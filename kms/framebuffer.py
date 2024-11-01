@@ -65,6 +65,10 @@ class DumbFramebuffer(Framebuffer):
     def __init__(self, card: Card, width: int, height: int, format: kms.PixelFormat) -> None:
         planes = []
 
+        for idx,pi in enumerate(format.planes):
+            print(f'P{idx}: STRIDE {format.stride(width, idx)}')
+            print(f'P{idx}: PLANE  {format.planesize(width, height, idx)}')
+
         assert width % format.pixelspergroup[0] == 0
 
         # DRM_IOCTL_MODE_CREATE_DUMB takes a 'bpp' (bits-per-pixel) argument,
@@ -81,12 +85,15 @@ class DumbFramebuffer(Framebuffer):
             creq.height = int(ceil(height / format.pixelspergroup[1])) * pi.linespergroup
             creq.bpp = pi.bytespergroup * 8
 
+            print(f'CREQ: {creq.width}x{creq.height} bpp:{creq.bpp}')
             fcntl.ioctl(card.fd, kms.uapi.DRM_IOCTL_MODE_CREATE_DUMB, creq, True)
 
             plane = Framebuffer.FramebufferPlane()
             plane.handle = creq.handle
             plane.pitch = creq.pitch
             plane.size = creq.height * creq.pitch
+
+            print(f'CREQ: stride:{creq.pitch} plane:{creq.size}')
 
             planes.append(plane)
 
