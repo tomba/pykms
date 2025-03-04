@@ -11,6 +11,9 @@ args = parser.parse_args()
 format = kms.PixelFormats.find_by_name(args.format)
 
 card = kms.Card()
+
+kms.AtomicReq.disable_all(card)
+
 res = kms.ResourceManager(card)
 conn = res.reserve_connector()
 crtc = res.reserve_crtc(conn)
