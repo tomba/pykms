@@ -123,7 +123,7 @@ class AtomicReq:
         else:
             raise RuntimeError('Bad add() call')
 
-    def add_connector(self, connector: kms.Connector, crtc: kms.Crtc):
+    def add_connector(self, connector: kms.Connector, crtc: kms.Crtc | None):
         self.add(connector.id, 'CRTC_ID', crtc.id if crtc else 0)
 
     def add_crtc(self, crtc: kms.Crtc, mode_blob: kms.Blob | None):
@@ -179,9 +179,16 @@ class AtomicReq:
         self.add(plane, m)
 
     @staticmethod
-    def set_mode(connector, crtc, fb, mode):
+    def set_mode(connector: kms.Connector, crtc: kms.Crtc,
+                 fb: kms.Framebuffer, mode: kms.VideoMode,
+                 plane: kms.Plane | None=None):
+        """Set up a pipeline with the connector and the CRTC,
+        using the given mode and framebuffer. A suitable plane
+        will be automatically selected, unless provided explicitly."""
         modeb = mode.to_blob(crtc.card)
-        plane = crtc.get_possible_planes()[0]
+
+        if not plane:
+            plane = next(crtc.iter_planes(fb.format))
 
         req = kms.AtomicReq(crtc.card)
 
@@ -190,3 +197,19 @@ class AtomicReq:
         req.add_plane(plane, fb, crtc, dst=(0, 0, mode.hdisplay, mode.vdisplay))
 
         req.commit_sync(allow_modeset = True)
+
+    @staticmethod
+    def disable_all(card: kms.Card):
+        """Disable all connectors, CRTCs and planes"""
+        req = kms.AtomicReq(card)
+
+        for conn in card.connectors:
+            req.add_connector(conn, None)
+
+        for crtc in card.crtcs:
+            req.add_crtc(crtc, None)
+
+        for plane in card.planes:
+            req.add_plane(plane, None, None)
+
+        req.commit_sync(allow_modeset=True)
