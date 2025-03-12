@@ -178,6 +178,8 @@ class DmabufFramebuffer(Framebuffer):
 
         self._sync_flags = 0
 
+        fds = [os.dup(fd) for fd in fds]
+
         for idx in range(len(format.planes)):
             args = kms.uapi.drm_prime_handle(fd=fds[idx])
             fcntl.ioctl(card.fd, kms.uapi.DRM_IOCTL_PRIME_FD_TO_HANDLE, args, True)
@@ -208,7 +210,7 @@ class DmabufFramebuffer(Framebuffer):
     def cleanup(card: Card, fb_id: int, planes: list[Framebuffer.FramebufferPlane]):
         for p in planes:
             if p.prime_fd != -1:
-                #os.close(p.prime_fd)
+                os.close(p.prime_fd)
                 p.prime_fd = -1
 
             if p.map:
