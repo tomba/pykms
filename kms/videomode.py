@@ -7,7 +7,8 @@ import kms.uapi
 if TYPE_CHECKING:
     from kms import Card
 
-__all__ = [ 'VideoMode' ]
+__all__ = ['VideoMode']
+
 
 class VideoMode:
     def __init__(self, modeinfo: kms.uapi.drm_mode_modeinfo):
@@ -26,6 +27,11 @@ class VideoMode:
     def clock(self):
         # modeinfo stores clock in kHz
         return self.modeinfo.clock * 1000
+
+    @clock.setter
+    def clock(self, value: int):
+        # modeinfo expects clock in kHz
+        self.modeinfo.clock = value // 1000
 
     # X11 style timings
 
@@ -147,14 +153,18 @@ class VideoMode:
             return 0
 
     def to_str_modeline(self):
-        return (f'{self.hdisplay}x{self.vdisplay}@{self.calculated_vrefresh:.2f} '
-                f'{self.clock/1e6:.2f} MHz '
-                f'H: {self.hdisplay}/{self.hsync_start}/{self.hsync_end}/{self.htotal} '
-                f'V: {self.vdisplay}/{self.vsync_start}/{self.vsync_end}/{self.vtotal}')
+        return (
+            f'{self.hdisplay}x{self.vdisplay}@{self.calculated_vrefresh:.2f} '
+            f'{self.clock} Hz '
+            f'H: {self.hdisplay}/{self.hsync_start}/{self.hsync_end}/{self.htotal} '
+            f'V: {self.vdisplay}/{self.vsync_start}/{self.vsync_end}/{self.vtotal}'
+        )
 
     def to_str(self):
-        return (f'{self.hdisplay}x{self.vdisplay}@{self.calculated_vrefresh:.2f}'
-                f'{"i" if self.interlace else ""} '
-                f'{self.clock/1e6:.2f} '
-                f'{self.hdisplay}/{self.hfp}/{self.hsw}/{self.hbp}/{self.htotal}/{["-", "?", "+"][self.hsync_polarity + 1]} '
-                f'{self.vdisplay}/{self.vfp}/{self.vsw}/{self.vbp}/{self.vtotal}/{["-", "?", "+"][self.vsync_polarity + 1]}')
+        return (
+            f'{self.hdisplay}x{self.vdisplay}@{self.calculated_vrefresh:.2f}'
+            f'{"i" if self.interlace else ""} '
+            f'{self.clock} Hz '
+            f'{self.hdisplay}/{self.hfp}/{self.hsw}/{self.hbp}/{self.htotal}/{["-", "?", "+"][self.hsync_polarity + 1]} '
+            f'{self.vdisplay}/{self.vfp}/{self.vsw}/{self.vbp}/{self.vtotal}/{["-", "?", "+"][self.vsync_polarity + 1]}'
+        )
