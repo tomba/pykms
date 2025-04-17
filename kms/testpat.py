@@ -20,7 +20,8 @@ class CDrawTestPatternParameters(ctypes.Structure):
         ('full_range', ctypes.c_bool),
     ]
 
-def draw_test_pattern(fb: kms.Framebuffer, pattern: str='') -> None:
+def draw_test_pattern(fb: kms.Framebuffer, pattern: str='',
+                      rec_standard: int=0, full_range: bool=True) -> None:
     """WARNING: Experimental, unstable! The C API might change, breaking this"""
     try:
         dll = ctypes.cdll.LoadLibrary('libkms++util.so')
@@ -50,7 +51,7 @@ def draw_test_pattern(fb: kms.Framebuffer, pattern: str='') -> None:
     opts.pitches = (ctypes.c_uint32 * 4)(*[p.pitch for p in fb.planes])
     opts.offsets = (ctypes.c_uint32 * 4)(*[p.offset for p in fb.planes])
     opts.pattern = pattern.encode('utf-8')
-    opts.rec_standard = 0
-    opts.full_range = False
+    opts.rec_standard = rec_standard
+    opts.full_range = full_range
 
     c_draw_test_pattern(ctypes.byref(opts))
