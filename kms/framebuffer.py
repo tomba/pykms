@@ -17,7 +17,7 @@ import kms.uapi
 if TYPE_CHECKING:
     from kms import Card
 
-__all__ = [ 'IFramebuffer', 'Framebuffer', 'DumbFramebuffer', 'DmabufFramebuffer', 'ExtFramebuffer' ]
+__all__ = [ 'IFramebuffer', 'Framebuffer', 'DumbFramebuffer', 'DmabufFramebuffer', 'ExtFramebuffer', 'CPUFramebuffer' ]
 
 
 class IFramebuffer(ABC):
@@ -362,3 +362,57 @@ class ExtFramebuffer(Framebuffer):
     @staticmethod
     def cleanup(card: Card, fb_id: int, planes: list[Framebuffer.FramebufferPlane]):
         fcntl.ioctl(card.fd, kms.uapi.DRM_IOCTL_MODE_RMFB, ctypes.c_uint32(fb_id), False)
+
+
+class CPUFramebuffer(IFramebuffer):
+    """CPU-only framebuffer that allocates memory without requiring KMS"""
+
+    def __init__(self, width, height, format_obj):
+        self._width = width
+        self._height = height
+        self._format = format_obj
+        self._planes = []
+
+        # Align width and height according to format requirements
+        aligned_width, aligned_height = format_obj.align_pixels(width, height)
+
+        # Create planes based on format
+        for plane_idx in range(len(format_obj.planes)):
+            stride = format_obj.stride(aligned_width, plane_idx)
+            size = format_obj.planesize(stride, aligned_height, plane_idx)
+            plane = kms.Framebuffer.FramebufferPlane()
+            plane.size = size
+            plane.pitch = stride
+            plane.offset = 0
+            plane.map = bytearray(size)  # type: ignore
+            self._planes.append(plane)
+
+    @property
+    def width(self) -> int:
+        return self._width
+
+    @property
+    def height(self) -> int:
+        return self._height
+
+    @property
+    def format(self) -> kms.PixelFormat:
+        return self._format
+
+    @property
+    def planes(self) -> list:
+        return self._planes
+
+    def map(self, plane_idx):
+        """Return memory-mapped buffer for the specified plane"""
+        return self._planes[plane_idx].map
+
+    def mmap(self):
+        """Return list of memory-mapped buffers for all planes"""
+        return [self.map(idx) for idx in range(len(self._planes))]
+
+    def begin_cpu_access(self, access):
+        pass
+
+    def end_cpu_access(self):
+        pass
