@@ -5,6 +5,7 @@ import fcntl
 import mmap
 import os
 import weakref
+from abc import ABC, abstractmethod
 
 from typing import TYPE_CHECKING
 
@@ -16,9 +17,49 @@ import kms.uapi
 if TYPE_CHECKING:
     from kms import Card
 
-__all__ = [ 'Framebuffer', 'DumbFramebuffer', 'DmabufFramebuffer', 'ExtFramebuffer' ]
+__all__ = [ 'IFramebuffer', 'Framebuffer', 'DumbFramebuffer', 'DmabufFramebuffer', 'ExtFramebuffer' ]
 
-class Framebuffer(kms.DrmObject):
+
+class IFramebuffer(ABC):
+    """Abstract framebuffer interface"""
+
+    @property
+    @abstractmethod
+    def width(self) -> int:
+        pass
+
+    @property
+    @abstractmethod
+    def height(self) -> int:
+        pass
+
+    @property
+    @abstractmethod
+    def format(self) -> kms.PixelFormat:
+        pass
+
+    @property
+    @abstractmethod
+    def planes(self) -> list:
+        pass
+
+    @abstractmethod
+    def map(self, plane_idx: int) -> mmap.mmap | bytearray:
+        pass
+
+    @abstractmethod
+    def mmap(self) -> list[mmap.mmap | bytearray]:
+        pass
+
+    @abstractmethod
+    def begin_cpu_access(self, access: str) -> None:
+        pass
+
+    @abstractmethod
+    def end_cpu_access(self) -> None:
+        pass
+
+class Framebuffer(kms.DrmObject, IFramebuffer):
     class FramebufferPlane:
         def __init__(self) -> None:
             self.handle = 0
@@ -31,18 +72,34 @@ class Framebuffer(kms.DrmObject):
     def __init__(self, card: Card, id: int, width: int, height: int, format: kms.PixelFormat, planes: list[FramebufferPlane]) -> None:
         super().__init__(card, id, kms.uapi.DRM_MODE_OBJECT_FB, -1)
 
-        self.width = width
-        self.height = height
-        self.format = format
-        self.planes = planes
+        self._width = width
+        self._height = height
+        self._format = format
+        self._planes = planes
+
+    @property
+    def width(self) -> int:
+        return self._width
+
+    @property
+    def height(self) -> int:
+        return self._height
+
+    @property
+    def format(self) -> kms.PixelFormat:
+        return self._format
+
+    @property
+    def planes(self) -> list[FramebufferPlane]:
+        return self._planes
 
     def size(self, plane_idx):
         return self.planes[plane_idx].size
 
-    def map(self, plane_idx: int) -> mmap.mmap:
+    def map(self, plane_idx: int) -> mmap.mmap | bytearray:
         raise NotImplementedError()
 
-    def mmap(self) -> list[mmap.mmap]:
+    def mmap(self) -> list[mmap.mmap | bytearray]:
         return [self.map(pidx) for pidx in range(len(self.planes))]
 
     def clear(self):
