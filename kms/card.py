@@ -113,6 +113,9 @@ class Card:
         if not cap.value:
             raise NotImplementedError('Card does not support atomic modesetting')
 
+    def drop_master(self):
+        fcntl.ioctl(self.fd, kms.uapi.DRM_IOCTL_DROP_MASTER, 0, False)
+
     def get_version(self):
         ver = kms.uapi.drm_version()
         fcntl.ioctl(self.fd, kms.uapi.DRM_IOCTL_VERSION, ver, True)
