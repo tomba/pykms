@@ -33,7 +33,7 @@ class Crtc(kms.DrmPropObject):
 
     @property
     def mode(self):
-        return kms.VideoMode(self.crtc_res.mode)
+        return kms.VideoMode._from_modeinfo(self.crtc_res.mode)
 
     @property
     def primary_plane(self):

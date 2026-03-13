@@ -58,7 +58,7 @@ class Connector(kms.DrmPropObject):
 
         self.connector_res = res
         self.encoder_ids = encoder_ids
-        self.modes = [kms.VideoMode(m) for m in modes]
+        self.modes = [kms.VideoMode._from_modeinfo(m) for m in modes]
 
         self.fullname = f'{Connector.connector_names[res.connector_type]}-{res.connector_type_id}'
 
@@ -81,7 +81,7 @@ class Connector(kms.DrmPropObject):
 
         fcntl.ioctl(self.card.fd, kms.uapi.DRM_IOCTL_MODE_GETCONNECTOR, res, True)
 
-        self.modes = [kms.VideoMode(m) for m in modes]
+        self.modes = [kms.VideoMode._from_modeinfo(m) for m in modes]
 
     def get_default_mode(self):
         return self.modes[0]

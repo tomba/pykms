@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from enum import IntFlag
 from typing import TYPE_CHECKING
 
 import kms.uapi
@@ -7,137 +8,140 @@ import kms.uapi
 if TYPE_CHECKING:
     from kms import Card
 
-__all__ = ['VideoMode']
+__all__ = ['VideoMode', 'ModeFlag', 'ModeType']
+
+
+class ModeFlag(IntFlag):
+    HSYNC_POS = kms.uapi.DRM_MODE_FLAG_PHSYNC
+    HSYNC_NEG = kms.uapi.DRM_MODE_FLAG_NHSYNC
+    VSYNC_POS = kms.uapi.DRM_MODE_FLAG_PVSYNC
+    VSYNC_NEG = kms.uapi.DRM_MODE_FLAG_NVSYNC
+    INTERLACE = kms.uapi.DRM_MODE_FLAG_INTERLACE
+    DBLSCAN = kms.uapi.DRM_MODE_FLAG_DBLSCAN
+    CSYNC = kms.uapi.DRM_MODE_FLAG_CSYNC
+    CSYNC_POS = kms.uapi.DRM_MODE_FLAG_PCSYNC
+    CSYNC_NEG = kms.uapi.DRM_MODE_FLAG_NCSYNC
+    HSKEW = kms.uapi.DRM_MODE_FLAG_HSKEW
+    DBLCLK = kms.uapi.DRM_MODE_FLAG_DBLCLK
+    CLKDIV2 = kms.uapi.DRM_MODE_FLAG_CLKDIV2
+
+
+class ModeType(IntFlag):
+    BUILTIN = kms.uapi.DRM_MODE_TYPE_BUILTIN
+    PREFERRED = kms.uapi.DRM_MODE_TYPE_PREFERRED
+    DEFAULT = kms.uapi.DRM_MODE_TYPE_DEFAULT
+    USERDEF = kms.uapi.DRM_MODE_TYPE_USERDEF
+    DRIVER = kms.uapi.DRM_MODE_TYPE_DRIVER
 
 
 class VideoMode:
-    def __init__(self, modeinfo: kms.uapi.drm_mode_modeinfo):
-        self.modeinfo = modeinfo
+    def __init__(self):
+        self.clock: int = 0
+        self.hdisplay: int = 0
+        self.hfp: int = 0
+        self.hsw: int = 0
+        self.hbp: int = 0
+        self.vdisplay: int = 0
+        self.vfp: int = 0
+        self.vsw: int = 0
+        self.vbp: int = 0
+        self.hskew: int = 0
+        self.vscan: int = 0
+        self.vrefresh: int = 0
+        self.flags: ModeFlag = ModeFlag(0)
+        self.type: ModeType = ModeType(0)
+        self.name: str = ''
+
+    @classmethod
+    def _from_modeinfo(cls, modeinfo: kms.uapi.drm_mode_modeinfo) -> VideoMode:
+        mode = cls()
+        mode.clock = modeinfo.clock * 1000
+        mode.hdisplay = modeinfo.hdisplay
+        mode.hfp = modeinfo.hsync_start - modeinfo.hdisplay
+        mode.hsw = modeinfo.hsync_end - modeinfo.hsync_start
+        mode.hbp = modeinfo.htotal - modeinfo.hsync_end
+        mode.vdisplay = modeinfo.vdisplay
+        mode.vfp = modeinfo.vsync_start - modeinfo.vdisplay
+        mode.vsw = modeinfo.vsync_end - modeinfo.vsync_start
+        mode.vbp = modeinfo.vtotal - modeinfo.vsync_end
+        mode.hskew = modeinfo.hskew
+        mode.vscan = modeinfo.vscan
+        mode.vrefresh = modeinfo.vrefresh
+        mode.flags = ModeFlag(modeinfo.flags)
+        mode.type = ModeType(modeinfo.type)
+        mode.name = modeinfo.name.decode('utf-8')
+        return mode
+
+    def _to_modeinfo(self) -> kms.uapi.drm_mode_modeinfo:
+        m = kms.uapi.drm_mode_modeinfo()
+        m.clock = self.clock // 1000
+        m.hdisplay = self.hdisplay
+        m.hsync_start = self.hsync_start
+        m.hsync_end = self.hsync_end
+        m.htotal = self.htotal
+        m.hskew = self.hskew
+        m.vdisplay = self.vdisplay
+        m.vsync_start = self.vsync_start
+        m.vsync_end = self.vsync_end
+        m.vtotal = self.vtotal
+        m.vscan = self.vscan
+        m.vrefresh = self.vrefresh
+        m.flags = int(self.flags)
+        m.type = int(self.type)
+        m.name = self.name.encode('utf-8')
+        return m
 
     def __repr__(self):
-        return f'VideoMode({self.modeinfo.hdisplay}x{self.modeinfo.vdisplay})'
+        return f'VideoMode({self.hdisplay}x{self.vdisplay})'
 
     def __str__(self):
-        return f'{self.modeinfo.hdisplay}x{self.modeinfo.vdisplay}@{self.modeinfo.vrefresh}'
+        return f'{self.hdisplay}x{self.vdisplay}@{self.vrefresh}'
 
     def to_blob(self, card: Card):
-        return kms.Blob(card, self.modeinfo)
+        return kms.Blob(card, self._to_modeinfo())
 
-    @property
-    def clock(self):
-        # modeinfo stores clock in kHz
-        return self.modeinfo.clock * 1000
-
-    @clock.setter
-    def clock(self, value: int):
-        # modeinfo expects clock in kHz
-        self.modeinfo.clock = value // 1000
-
-    # X11 style timings
-
-    @property
-    def hdisplay(self):
-        return self.modeinfo.hdisplay
+    # X modeline style properties (computed, read-only)
 
     @property
     def hsync_start(self):
-        return self.modeinfo.hsync_start
+        return self.hdisplay + self.hfp
 
     @property
     def hsync_end(self):
-        return self.modeinfo.hsync_end
+        return self.hdisplay + self.hfp + self.hsw
 
     @property
     def htotal(self):
-        return self.modeinfo.htotal
-
-    @property
-    def hskew(self):
-        return self.modeinfo.hskew
-
-    @property
-    def vdisplay(self):
-        return self.modeinfo.vdisplay
+        return self.hdisplay + self.hfp + self.hsw + self.hbp
 
     @property
     def vsync_start(self):
-        return self.modeinfo.vsync_start
+        return self.vdisplay + self.vfp
 
     @property
     def vsync_end(self):
-        return self.modeinfo.vsync_end
+        return self.vdisplay + self.vfp + self.vsw
 
     @property
     def vtotal(self):
-        return self.modeinfo.vtotal
-
-    @property
-    def vscan(self):
-        return self.modeinfo.vscan
-
-    @property
-    def vrefresh(self):
-        return self.modeinfo.vrefresh
-
-    @property
-    def flags(self):
-        return self.modeinfo.flags
-
-    @property
-    def type(self):
-        return self.modeinfo.type
-
-    @property
-    def name(self):
-        return self.modeinfo.name.decode('utf-8')
-
-    # Conventional timing properties (horizontal)
-    @property
-    def hfp(self):
-        """Horizontal Front Porch"""
-        return self.hsync_start - self.hdisplay
-
-    @property
-    def hsw(self):
-        """Horizontal Sync Width"""
-        return self.hsync_end - self.hsync_start
-
-    @property
-    def hbp(self):
-        """Horizontal Back Porch"""
-        return self.htotal - self.hsync_end
-
-    # Conventional timing properties (vertical)
-    @property
-    def vfp(self):
-        """Vertical Front Porch"""
-        return self.vsync_start - self.vdisplay
-
-    @property
-    def vsw(self):
-        """Vertical Sync Width"""
-        return self.vsync_end - self.vsync_start
-
-    @property
-    def vbp(self):
-        """Vertical Back Porch"""
-        return self.vtotal - self.vsync_end
+        return self.vdisplay + self.vfp + self.vsw + self.vbp
 
     @property
     def calculated_vrefresh(self):
         return self.clock / (self.htotal * self.vtotal)
 
     # Flag-based properties
+
     @property
     def interlace(self):
-        return self.modeinfo.flags & kms.uapi.DRM_MODE_FLAG_INTERLACE
+        return bool(self.flags & ModeFlag.INTERLACE)
 
     @property
     def hsync_polarity(self):
         """Horizontal Sync Polarity: 1 = positive, -1 = negative, 0 = not specified"""
-        if self.modeinfo.flags & kms.uapi.DRM_MODE_FLAG_PHSYNC:
+        if self.flags & ModeFlag.HSYNC_POS:
             return 1
-        elif self.modeinfo.flags & kms.uapi.DRM_MODE_FLAG_NHSYNC:
+        elif self.flags & ModeFlag.HSYNC_NEG:
             return -1
         else:
             return 0
@@ -145,9 +149,9 @@ class VideoMode:
     @property
     def vsync_polarity(self):
         """Vertical Sync Polarity: 1 = positive, -1 = negative, 0 = not specified"""
-        if self.modeinfo.flags & kms.uapi.DRM_MODE_FLAG_PVSYNC:
+        if self.flags & ModeFlag.VSYNC_POS:
             return 1
-        elif self.modeinfo.flags & kms.uapi.DRM_MODE_FLAG_NVSYNC:
+        elif self.flags & ModeFlag.VSYNC_NEG:
             return -1
         else:
             return 0
