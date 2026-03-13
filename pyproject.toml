@@ -60,6 +60,7 @@ extras = [
     'numpy',
     'Pillow',
     'pyudev',
+    'urwid',
     'xcffib',
     'pygbm @ git+https://github.com/tomba/pygbm.git',
 ]
