@@ -43,7 +43,7 @@ class Card:
 
     @staticmethod
     def __open_first_kms_device() -> str:
-        for path in glob.glob('/dev/dri/card*'):
+        for path in sorted(glob.glob('/dev/dri/card*')):
             try:
                 fd = os.open(path, os.O_RDWR | os.O_NONBLOCK)
             except OSError:
