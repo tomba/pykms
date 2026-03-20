@@ -4,16 +4,19 @@ import argparse
 import kms
 
 parser = argparse.ArgumentParser()
+parser.add_argument('-C', '--card', type=int)
 parser.add_argument('-c', '--connector', default='')
 parser.add_argument('-x', '--modeline', action='store_true', help='print modeline')
 args = parser.parse_args()
 
-card = kms.Card()
+card = kms.Card(f'/dev/dri/card{args.card}' if args.card else None)
 
 res = kms.ResourceManager(card)
 conn = res.reserve_connector(args.connector)
 crtc = res.reserve_crtc(conn)
 plane = res.reserve_generic_plane(crtc)
+
+print(f'Using card {card}, connector {conn}, crtc {crtc}, plane {plane}')
 
 kms.AtomicReq.disable_all(card)
 
