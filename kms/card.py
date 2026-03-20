@@ -227,3 +227,9 @@ class Card:
             i += ev.length
 
         return events
+
+    def __repr__(self) -> str:
+        return f'Card({self.dev_path})'
+
+    def __str__(self) -> str:
+        return self.dev_path

@@ -99,6 +99,9 @@ class Connector(kms.DrmPropObject):
     def __repr__(self) -> str:
         return f'Connector({self.id})'
 
+    def __str__(self) -> str:
+        return f'{self.fullname}({self.id})'
+
     @property
     def possible_crtcs(self):
         crtcs = set()
