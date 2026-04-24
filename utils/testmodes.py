@@ -9,7 +9,7 @@ parser.add_argument('-c', '--connector', default='')
 parser.add_argument('-x', '--modeline', action='store_true', help='print modeline')
 args = parser.parse_args()
 
-card = kms.Card(f'/dev/dri/card{args.card}' if args.card else None)
+card = kms.Card(f'/dev/dri/card{args.card}' if args.card is not None else None)
 
 res = kms.ResourceManager(card)
 conn = res.reserve_connector(args.connector)
