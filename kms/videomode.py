@@ -100,6 +100,11 @@ class VideoMode:
     def to_blob(self, card: Card):
         return kms.Blob(card, self._to_modeinfo())
 
+    def copy(self) -> VideoMode:
+        new = VideoMode()
+        new.__dict__.update(self.__dict__)
+        return new
+
     # X modeline style properties (computed, read-only)
 
     @property
