@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from ctypes import cdll
+from typing import cast
 import selectors
 import xcffib
 import xcffib.xproto
@@ -27,6 +28,9 @@ class X11Window:
 
         # Connect to X server using XCB
         self.conn = xcffib.Connection()
+        # conn.core is dynamically set to xprotoExtension at runtime, but
+        # pyright only sees the base Extension type — cast for typed access.
+        self.core = cast(xcffib.xproto.xprotoExtension, self.conn.core)
         self.setup = self.conn.get_setup()
         self.screen = self.setup.roots[0] # type: ignore
         self.xcb_fd =  self.conn.get_file_descriptor()
@@ -54,7 +58,7 @@ class X11Window:
             xcffib.xproto.EventMask.StructureNotify  # For resize events
         ]
 
-        self.conn.core.CreateWindow(
+        self.core.CreateWindow(
             self.screen.root_depth,
             self.window_id,
             self.screen.root,
@@ -68,15 +72,15 @@ class X11Window:
         )
 
         # Set up WM_DELETE_WINDOW protocol
-        self.wm_protocols = self.conn.core.InternAtom(
+        self.wm_protocols = self.core.InternAtom(
             False, len('WM_PROTOCOLS'), 'WM_PROTOCOLS'
         ).reply().atom
 
-        self.wm_delete_window = self.conn.core.InternAtom(
+        self.wm_delete_window = self.core.InternAtom(
             False, len('WM_DELETE_WINDOW'), 'WM_DELETE_WINDOW'
         ).reply().atom
 
-        self.conn.core.ChangeProperty(
+        self.core.ChangeProperty(
             xcffib.xproto.PropMode.Replace,
             self.window_id,
             self.wm_protocols,
@@ -88,7 +92,7 @@ class X11Window:
         if self.fullscreen:
             self._set_fullscreen()
 
-        self.conn.core.MapWindow(self.window_id)
+        self.core.MapWindow(self.window_id)
         self.conn.flush()
 
     def _set_fullscreen(self):
@@ -96,14 +100,14 @@ class X11Window:
         net_wm_state = '_NET_WM_STATE'
         net_wm_state_fullscreen = '_NET_WM_STATE_FULLSCREEN'
 
-        cookie = self.conn.core.InternAtom(False, len(net_wm_state), net_wm_state)
+        cookie = self.core.InternAtom(False, len(net_wm_state), net_wm_state)
         reply = cookie.reply()
 
-        cookie2 = self.conn.core.InternAtom(False, len(net_wm_state_fullscreen),
+        cookie2 = self.core.InternAtom(False, len(net_wm_state_fullscreen),
                                           net_wm_state_fullscreen)
         reply2 = cookie2.reply()
 
-        self.conn.core.ChangeProperty(
+        self.core.ChangeProperty(
             xcffib.xproto.PropMode.Replace,
             self.window_id,
             reply.atom,
@@ -197,8 +201,8 @@ class X11Window:
 
     def cleanup(self):
         """Clean up XCB resources"""
-        self.conn.core.UnmapWindow(self.window_id)
-        self.conn.core.DestroyWindow(self.window_id)
+        self.core.UnmapWindow(self.window_id)
+        self.core.DestroyWindow(self.window_id)
         self.conn.flush()
         self.conn.disconnect()
 
