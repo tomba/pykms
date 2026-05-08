@@ -31,8 +31,7 @@ class FlipHandler:
         time_delta = time - self.time
         if time_delta >= 5:
             frame_delta = frame - self.frames
-            print('Frame rate: %f (%u/%u frames in %f s)' %
-                  (frame_delta / time_delta, self.flips, frame_delta, time_delta))
+            print(f'Frame rate: {frame_delta / time_delta:f} ({self.flips}/{frame_delta} frames in {time_delta:f} s)')
 
             self.flips = 0
             self.frames = frame
