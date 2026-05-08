@@ -3,6 +3,7 @@
 import argparse
 import urwid
 import kms
+import kms.testpat
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-C', '--card', type=int)
@@ -362,7 +363,7 @@ class KmsModeView:
             self._card, self._mode.hdisplay, self._mode.vdisplay,
             kms.PixelFormats.XRGB8888,
         )
-        kms.draw_test_pattern(self._fb)
+        kms.testpat.draw_test_pattern(self._fb)
         kms.AtomicReq.set_mode(self._conn, self._crtc, self._fb, self._mode)
 
     def _on_mode_press(self, _widget, mode):

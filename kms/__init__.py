@@ -18,4 +18,3 @@ from .plane import *
 from .framebuffer import *
 from .resource_manager import *
 from .atomicreq import *
-from .testpat import *

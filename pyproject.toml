@@ -63,4 +63,5 @@ extras = [
     'urwid',
     'xcffib',
     'pygbm @ git+https://github.com/tomba/pygbm.git',
+    'pixpat @ git+https://github.com/tomba/pixpat.git',
 ]

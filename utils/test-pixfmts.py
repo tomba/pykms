@@ -3,21 +3,23 @@
 import argparse
 import sys
 
-import numpy as np
-
 import kms
-
-def draw_test_pattern(fb: kms.DumbFramebuffer):
-    for idx,_ in enumerate(fb.format.planes):
-        b = np.frombuffer(fb.map(idx), dtype=np.uint8)
-        b[:] = 0xff
+import kms.testpat
 
 def test_fmt(conn, crtc, plane, mode, modeb, fmt):
     card = conn.card
 
-    fb = kms.DumbFramebuffer(card, mode.hdisplay, mode.vdisplay, fmt)
+    try:
+        fb = kms.DumbFramebuffer(card, mode.hdisplay, mode.vdisplay, fmt)
+    except Exception as e:
+        print(f'Skipping format {fmt}: unable to create dumb fb: {e}')
+        return
 
-    draw_test_pattern(fb)
+    try:
+        kms.testpat.draw_test_pattern(fb)
+    except Exception as e:
+        print(f'Skipping format {fmt}: unable to draw test pattern: {e}')
+        return
 
     req = kms.AtomicReq(card)
 

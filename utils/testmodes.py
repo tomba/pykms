@@ -2,6 +2,7 @@
 
 import argparse
 import kms
+import kms.testpat
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-C', '--card', type=int)
@@ -27,7 +28,7 @@ for mode in conn.modes:
         print(mode.to_str())
 
     fb = kms.DumbFramebuffer(card, mode.hdisplay, mode.vdisplay, kms.PixelFormats.XRGB8888)
-    kms.draw_test_pattern(fb)
+    kms.testpat.draw_test_pattern(fb)
 
     kms.AtomicReq.set_mode(conn, crtc, fb, mode, plane)
 

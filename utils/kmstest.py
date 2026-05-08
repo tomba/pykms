@@ -7,6 +7,7 @@ import time
 from pixutils.dmaheap import DMAHeap
 
 import kms
+import kms.testpat
 
 def main():
     parser = argparse.ArgumentParser()

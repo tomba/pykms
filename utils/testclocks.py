@@ -5,6 +5,7 @@ import select
 import sys
 import time
 import kms
+import kms.testpat
 
 parser = argparse.ArgumentParser(description='Test display clocks for a KMS device')
 parser.add_argument('-c', '--connector', help='Specify the connector to use (default: auto-select)')
@@ -47,7 +48,7 @@ end = args.end if args.end else mode.clock
 increment = args.increment if args.increment else 1000
 
 fb = kms.DumbFramebuffer(card, mode.hdisplay, mode.vdisplay, kms.PixelFormats.XRGB8888)
-kms.draw_test_pattern(fb)
+kms.testpat.draw_test_pattern(fb)
 
 for pclk in range(start, end + 1, increment):
     mode.clock = pclk
