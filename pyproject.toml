@@ -10,7 +10,7 @@ dependencies = [
   'pixutils @ git+https://github.com/tomba/pixutils.git',
 ]
 
-requires-python = '>=3.12'
+requires-python = '>=3.10'
 authors = [
   {name = 'Tomi Valkeinen', email = 'tomi.valkeinen@ideasonboard.com'},
 ]
