@@ -4,6 +4,6 @@
 	],
 	"extraPaths": [
 		"../pixutils",
-		"../pygbm",
-	],
+		"../pygbm"
+	]
 }
