@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import ctypes
 import fcntl
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 import kms
 import kms.uapi
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 __all__ = [ 'Connector', ]
 
 class Connector(kms.DrmPropObject):
-    connector_names = {
+    connector_names: ClassVar[dict[int, str]] = {
         kms.uapi.DRM_MODE_CONNECTOR_Unknown: 'Unknown',
         kms.uapi.DRM_MODE_CONNECTOR_VGA: 'VGA',
         kms.uapi.DRM_MODE_CONNECTOR_DVII: 'DVI-I',

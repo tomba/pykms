@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import selectors
 import sys
+from typing import ClassVar
 
 import kms
 
@@ -20,7 +21,7 @@ from gbm import GBM_BO_USE_RENDERING, GBM_BO_USE_SCANOUT, GBM_FORMAT_XRGB8888, G
 
 class GbmEglSurface:
     # Class-level cache of buffer objects to framebuffers
-    _fb_cache = {}
+    _fb_cache: ClassVar[dict] = {}
 
     def __init__(self, card, gbm_dev: GbmDevice, egl_state: EglState, width: int, height: int):
         self.card = card
@@ -164,10 +165,9 @@ def main():
             for key, mask in events:
                 if key.fileobj == card.fd:
                     for ev in card.read_events():
-                        if ev.type == kms.DrmEventType.FLIP_COMPLETE:
-                            if out.flip_pending:
-                                out.handle_page_flip(ev.seq, ev.time)
-                                break
+                        if ev.type == kms.DrmEventType.FLIP_COMPLETE and out.flip_pending:
+                            out.handle_page_flip(ev.seq, ev.time)
+                            break
 
                 elif key.fileobj == sys.stdin:
                     return

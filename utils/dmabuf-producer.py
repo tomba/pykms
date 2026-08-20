@@ -109,7 +109,7 @@ def main():
             while True:
                 ready = select.select([client], [], [], 0)
                 if ready[0]:
-                    data, ancdata, flags, addr = client.recvmsg(struct.calcsize('ii'))
+                    data, _ancdata, _flags, _addr = client.recvmsg(struct.calcsize('ii'))
                     if data:
                         src_id, fb_id = struct.unpack('ii', data)
                         src = sources[src_id]

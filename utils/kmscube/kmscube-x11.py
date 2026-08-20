@@ -134,10 +134,10 @@ class X11Window:
                     self.height = event.height
                     self.gl_scene.set_viewport(self.width, self.height)
 
-            elif isinstance(event, xcffib.xproto.ClientMessageEvent):
-                if event.data.data32[0] == self.wm_delete_window:
-                    print('Exit due to window close')
-                    self.need_exit = True
+            elif isinstance(event, xcffib.xproto.ClientMessageEvent) and \
+                 event.data.data32[0] == self.wm_delete_window:
+                print('Exit due to window close')
+                self.need_exit = True
 
             event = self.conn.poll_for_event()
 

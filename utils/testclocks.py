@@ -78,9 +78,8 @@ for pclk in range(start, end + 1, increment):
             if sys.stdin.readline().strip():
                 break_outer = True
 
-        if args.time:
-            if tnow - tstart >= args.time:
-                break_loop = True
+        if args.time and tnow - tstart >= args.time:
+            break_loop = True
 
         if break_loop or tnow - tlast >= 0.1:
             td = tnow - tstart

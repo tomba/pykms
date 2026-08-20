@@ -100,14 +100,14 @@ class AtomicReq:
         elif isinstance(ob, kms.DrmPropObject):
             ob_id = ob.id
         else:
-            raise RuntimeError('Bad object')
+            raise TypeError('Bad object')
 
         if isinstance(prop, int):
             prop_id = prop
         elif isinstance(prop, str):
             prop_id = self.card.find_property_id(ob, prop)
         else:
-            raise RuntimeError('Bad prop')
+            raise TypeError('Bad prop')
 
         self.props.append((ob_id, prop_id, value))
 
@@ -149,10 +149,10 @@ class AtomicReq:
              'CRTC_ID': crtc.id if crtc else 0}
 
         if src is not None:
-            src_x = int(round(src[0] * 0x10000))
-            src_y = int(round(src[1] * 0x10000))
-            src_w = int(round(src[2] * 0x10000))
-            src_h = int(round(src[3] * 0x10000))
+            src_x = round(src[0] * 0x10000)
+            src_y = round(src[1] * 0x10000)
+            src_w = round(src[2] * 0x10000)
+            src_h = round(src[3] * 0x10000)
 
             m['SRC_X'] = src_x
             m['SRC_Y'] = src_y
@@ -160,10 +160,10 @@ class AtomicReq:
             m['SRC_H'] = src_h
 
         if dst is not None:
-            crtc_x = int(round(dst[0]))
-            crtc_y = int(round(dst[1]))
-            crtc_w = int(round(dst[2]))
-            crtc_h = int(round(dst[3]))
+            crtc_x = round(dst[0])
+            crtc_y = round(dst[1])
+            crtc_w = round(dst[2])
+            crtc_h = round(dst[3])
 
             m['CRTC_X'] = crtc_x
             m['CRTC_Y'] = crtc_y

@@ -12,13 +12,13 @@ def test_fmt(conn, crtc, plane, mode, modeb, fmt):
 
     try:
         fb = kms.DumbFramebuffer(card, mode.hdisplay, mode.vdisplay, fmt)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - probe all formats, skip whichever ones fail
         print(f'Skipping format {fmt}: unable to create dumb fb: {e}')
         return
 
     try:
         kms.testpat.draw_test_pattern(fb)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - probe all formats, skip whichever ones fail
         print(f'Skipping format {fmt}: unable to draw test pattern: {e}')
         return
 
@@ -33,7 +33,7 @@ def test_fmt(conn, crtc, plane, mode, modeb, fmt):
     input('press enter to continue\n')
 
 def tests(conn, crtc, plane, mode, formats):
-    print(f'Test formats: {list(fmt.name for fmt in formats)}')
+    print(f'Test formats: {[fmt.name for fmt in formats]}')
 
     card = conn.card
 

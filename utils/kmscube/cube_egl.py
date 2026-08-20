@@ -79,10 +79,10 @@ class EglState:
         self.config = None
         for cfg in configs[:num_matched.value]:
             vid = ctypes.c_long()
-            if egl.eglGetConfigAttrib(self.display, cfg, egl.EGL_NATIVE_VISUAL_ID, vid):
-                if vid.value == native_visual_id or not native_visual_id:
-                    self.config = cfg
-                    break
+            if egl.eglGetConfigAttrib(self.display, cfg, egl.EGL_NATIVE_VISUAL_ID, vid) and \
+               (vid.value == native_visual_id or not native_visual_id):
+                self.config = cfg
+                break
 
         if not self.config:
             raise RuntimeError('Failed to find matching EGL config')

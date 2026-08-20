@@ -25,7 +25,7 @@ class TestCardMethods(unittest.TestCase):
 
         card = None
         gc.collect()
-        with self.assertRaises(Exception):
+        with self.assertRaises(OSError):
             fcntl.fcntl(fd, fcntl.F_GETFD)
 
     def test_card_fb_2(self):
@@ -42,9 +42,9 @@ class TestCardMethods(unittest.TestCase):
         gc.collect()
         fb = None
         gc.collect()
-        with self.assertRaises(Exception):
+        with self.assertRaises(OSError):
             fcntl.fcntl(fd, fcntl.F_GETFD)
-        with self.assertRaises(Exception):
+        with self.assertRaises(OSError):
             fcntl.fcntl(fb_fd, fcntl.F_GETFD)
         self.assertTrue(map.closed)
 
