@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from enum import Enum
+
 import kms.uapi
 
-__all__ = [ 'PlaneType', 'EncoderType' ]
+__all__ = ['EncoderType', 'PlaneType']
 
 class PlaneType(Enum):
     OVERLAY = kms.uapi.DRM_PLANE_TYPE_OVERLAY

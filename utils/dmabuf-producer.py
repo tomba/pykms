@@ -8,9 +8,10 @@ import socket
 import struct
 import time
 
+import numpy as np
+
 from kms import Card, PixelFormats
 from kms.framebuffer import DumbFramebuffer
-import numpy as np
 
 # Constants
 SOCKET_PATH = '/tmp/dmabuf_socket'

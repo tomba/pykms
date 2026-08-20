@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 import os
 import socket
 import struct
 import sys
 import time
+from dataclasses import dataclass
 
 # Constants
 SOCKET_PATH = '/tmp/dmabuf_socket'

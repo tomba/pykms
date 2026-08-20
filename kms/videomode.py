@@ -8,7 +8,7 @@ import kms.uapi
 if TYPE_CHECKING:
     from kms import Card
 
-__all__ = ['VideoMode', 'ModeFlag', 'ModeType']
+__all__ = ['ModeFlag', 'ModeType', 'VideoMode']
 
 
 class ModeFlag(IntFlag):

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from enum import Enum, auto
 
-__all__ = [ 'DrmEventType', 'DrmEvent' ]
+__all__ = ['DrmEvent', 'DrmEventType']
 
 class DrmEventType(Enum):
     FLIP_COMPLETE = auto()

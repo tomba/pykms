@@ -6,6 +6,7 @@ import sys
 
 import kms
 
+
 def printi(indent: int, *args):
     print(' ' * indent, end='')
     print(*args)

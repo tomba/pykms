@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
 import argparse
-from PIL import Image
+
 import numpy as np
+from PIL import Image
+
 import kms
 
 parser = argparse.ArgumentParser()

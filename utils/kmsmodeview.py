@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 import argparse
+
 import urwid
+
 import kms
 import kms.testpat
 

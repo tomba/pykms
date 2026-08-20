@@ -4,6 +4,7 @@ import argparse
 import select
 import sys
 import time
+
 import kms
 import kms.testpat
 

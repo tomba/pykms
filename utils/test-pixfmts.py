@@ -6,6 +6,7 @@ import sys
 import kms
 import kms.testpat
 
+
 def test_fmt(conn, crtc, plane, mode, modeb, fmt):
     card = conn.card
 

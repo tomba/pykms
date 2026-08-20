@@ -7,16 +7,15 @@ import io
 import os
 import weakref
 
+import kms.uapi
+from kms.connector import Connector
+from kms.crtc import Crtc
 from kms.drmevent import DrmEvent, DrmEventType
 from kms.drmproperty import DrmProperty
 from kms.drmpropobject import DrmPropObject
-from kms.connector import Connector
 from kms.encoder import Encoder
-from kms.crtc import Crtc
-from kms.plane import Plane
 from kms.framebuffer import Framebuffer
-
-import kms.uapi
+from kms.plane import Plane
 
 __all__ = [
     'Card',

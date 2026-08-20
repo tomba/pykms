@@ -4,6 +4,7 @@ import ctypes
 
 from OpenGL import EGL as egl
 
+
 def _print_egl_config(egl_display, config):
     attributes = {
         egl.EGL_CONFIG_ID: 'CONFIG_ID',

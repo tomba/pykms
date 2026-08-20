@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import os
-import sys
-
 import selectors
+import sys
 
 import kms
 
@@ -14,10 +13,10 @@ sys.path.append(os.path.dirname(__file__))
 
 os.environ['PYOPENGL_PLATFORM'] = 'egl'
 
-from gbm import GbmDevice, GBM_FORMAT_XRGB8888, GBM_BO_USE_SCANOUT, GBM_BO_USE_RENDERING
-
 from cube_egl import EglState, EglSurface
 from cube_gl import GlScene
+from gbm import GBM_BO_USE_RENDERING, GBM_BO_USE_SCANOUT, GBM_FORMAT_XRGB8888, GbmDevice
+
 
 class GbmEglSurface:
     # Class-level cache of buffer objects to framebuffers

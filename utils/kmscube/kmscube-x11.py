@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-from ctypes import cdll
-from typing import cast
-import selectors
-import xcffib
-import xcffib.xproto
-
 import os
+import selectors
 import sys
 import time
+from ctypes import cdll
+from typing import cast
+
+import xcffib
+import xcffib.xproto
 
 # It's hard to import from the current dir... So add the current directory to PYTHONPATH
 sys.path.append(os.path.dirname(__file__))
@@ -19,6 +19,7 @@ os.environ['PYOPENGL_PLATFORM'] = 'egl'
 
 from cube_egl import EglState, EglSurface
 from cube_gl import GlScene
+
 
 class X11Window:
     def __init__(self, fullscreen: bool = False, num_frames: int | None = None):

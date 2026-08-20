@@ -6,8 +6,11 @@ import argparse
 import selectors
 import sys
 import time
+
 import numpy as np
+
 import kms
+
 
 class State:
     def __init__(self, card, conn, crtc, plane, mode) -> None:

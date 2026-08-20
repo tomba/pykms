@@ -6,7 +6,6 @@ import mmap
 import os
 import weakref
 from abc import ABC, abstractmethod
-
 from typing import TYPE_CHECKING
 
 import pixutils.ioctl
@@ -17,7 +16,7 @@ import kms.uapi
 if TYPE_CHECKING:
     from kms import Card
 
-__all__ = [ 'IFramebuffer', 'Framebuffer', 'DumbFramebuffer', 'DmabufFramebuffer', 'ExtFramebuffer', 'CPUFramebuffer' ]
+__all__ = ['CPUFramebuffer', 'DmabufFramebuffer', 'DumbFramebuffer', 'ExtFramebuffer', 'Framebuffer', 'IFramebuffer']
 
 
 class IFramebuffer(ABC):

@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from enum import Enum, auto
 import ctypes
 import fcntl
-
+from enum import Enum, auto
 from typing import TYPE_CHECKING
 
 import kms
@@ -12,7 +11,7 @@ import kms.uapi
 if TYPE_CHECKING:
     from kms import Card
 
-__all__ = [ 'DrmPropertyType', 'DrmProperty', ]
+__all__ = ['DrmProperty', 'DrmPropertyType']
 
 class DrmPropertyType(Enum):
     RANGE = auto()

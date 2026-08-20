@@ -6,8 +6,7 @@ import argparse
 import sys
 
 import pixpat
-from pixutils.formats import PixelFormats, PixelColorEncoding
-
+from pixutils.formats import PixelColorEncoding, PixelFormats
 
 REC_MAP = {
     'bt601': pixpat.Rec.BT601,
@@ -93,8 +92,7 @@ def main():
         filename = generate_filename(args.width, args.height, args.format)
 
     with open(filename, 'wb') as f:
-        for plane_data in planes:
-            f.write(plane_data)
+        f.writelines(planes)
 
     print(f'Generated: {filename}')
     return 0

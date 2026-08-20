@@ -2,8 +2,10 @@
 
 import atexit
 import sys
+
 import kms
 from kms import drawing
+
 
 def exit_handler():
     print('Press enter to exit program')
