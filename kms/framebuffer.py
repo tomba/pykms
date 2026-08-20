@@ -340,7 +340,6 @@ class DmabufFramebuffer(Framebuffer):
             raise RuntimeError('Bad access type "{access}"')
 
         dbs = DmabufFramebuffer.struct_dma_buf_sync()
-        # pylint: disable=attribute-defined-outside-init
         dbs.flags = DmabufFramebuffer.DMA_BUF_SYNC_START | self._sync_flags
 
         for p in self.planes:
@@ -351,7 +350,6 @@ class DmabufFramebuffer(Framebuffer):
             raise RuntimeError('begin_cpu sync not started')
 
         dbs = DmabufFramebuffer.struct_dma_buf_sync()
-        # pylint: disable=attribute-defined-outside-init
         dbs.flags = DmabufFramebuffer.DMA_BUF_SYNC_END | self._sync_flags
 
         for p in self.planes:
