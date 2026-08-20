@@ -59,7 +59,7 @@ quote-style = 'single'
 
 [project.optional-dependencies]
 test = ['pytest']
-extras = [
+utils = [
     'pyopengl',
     'numpy',
     'Pillow',
