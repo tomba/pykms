@@ -45,7 +45,7 @@ extend-exclude = ['kms/uapi/']
 
 [tool.ruff.lint]
 extend-select = ['E', 'W', 'F', 'FA', 'Q', 'UP', 'PLE', 'PLW']
-ignore = ['E741', 'E501', 'Q001', 'E702', 'UP032']  # TODO: fix E501
+ignore = ['E741', 'E501', 'Q001', 'UP032']  # TODO: fix E501
 
 [tool.ruff.lint.per-file-ignores]
 '__init__.py' = ['F401', 'F403']
