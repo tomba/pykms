@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, ClassVar
 
 import kms
 import kms.uapi
+from kms.drmpropobject import DrmPropObject
 
 if TYPE_CHECKING:
     from kms import Card
@@ -15,7 +16,7 @@ __all__ = [
 ]
 
 
-class Connector(kms.DrmPropObject):
+class Connector(DrmPropObject):
     connector_names: ClassVar[dict[int, str]] = {
         kms.uapi.DRM_MODE_CONNECTOR_Unknown: 'Unknown',
         kms.uapi.DRM_MODE_CONNECTOR_VGA: 'VGA',

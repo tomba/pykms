@@ -12,6 +12,7 @@ import pixutils.ioctl
 
 import kms
 import kms.uapi
+from kms.drmobject import DrmObject
 
 if TYPE_CHECKING:
     from kms import Card
@@ -66,7 +67,7 @@ class IFramebuffer(ABC):
         pass
 
 
-class Framebuffer(kms.DrmObject, IFramebuffer):
+class Framebuffer(DrmObject, IFramebuffer):
     class FramebufferPlane:
         def __init__(self) -> None:
             self.handle = 0

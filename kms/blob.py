@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 import kms
 import kms.uapi
+from kms.drmobject import DrmObject
 
 if TYPE_CHECKING:
     from kms import Card
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
 __all__ = ['Blob']
 
 
-class Blob(kms.DrmObject):
+class Blob(DrmObject):
     def __init__(self, card: Card, data) -> None:
         blob = kms.uapi.drm_mode_create_blob()
         blob.data = ctypes.addressof(data)

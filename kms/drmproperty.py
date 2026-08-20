@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 import kms
 import kms.uapi
+from kms.drmobject import DrmObject
 
 if TYPE_CHECKING:
     from kms import Card
@@ -23,7 +24,7 @@ class DrmPropertyType(Enum):
     SIGNED_RANGE = auto()
 
 
-class DrmProperty(kms.DrmObject):
+class DrmProperty(DrmObject):
     def __init__(self, card: Card, id) -> None:
         super().__init__(card, id, kms.uapi.DRM_MODE_OBJECT_PROPERTY, -1)
 

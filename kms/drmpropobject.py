@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 import kms
 import kms.uapi
+from kms.drmobject import DrmObject
 
 if TYPE_CHECKING:
     from kms import Card
@@ -15,7 +16,7 @@ __all__ = [
 ]
 
 
-class DrmPropObject(kms.DrmObject):
+class DrmPropObject(DrmObject):
     def __init__(self, card: Card, id, type, idx) -> None:
         super().__init__(card, id, type, idx)
         self.refresh_props()

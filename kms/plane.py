@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 import kms
 import kms.uapi
+from kms.drmpropobject import DrmPropObject
 
 if TYPE_CHECKING:
     from kms import Card, Crtc
@@ -15,7 +16,7 @@ __all__ = [
 ]
 
 
-class Plane(kms.DrmPropObject):
+class Plane(DrmPropObject):
     def __init__(self, card: Card, id, idx) -> None:
         super().__init__(card, id, kms.uapi.DRM_MODE_OBJECT_PLANE, idx)
 

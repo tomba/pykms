@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 import kms
 import kms.uapi
+from kms.drmpropobject import DrmPropObject
 
 if TYPE_CHECKING:
     from kms import Card
@@ -14,7 +15,7 @@ __all__ = [
 ]
 
 
-class Crtc(kms.DrmPropObject):
+class Crtc(DrmPropObject):
     def __init__(self, card: Card, id, idx) -> None:
         super().__init__(card, id, kms.uapi.DRM_MODE_OBJECT_CRTC, idx)
 
