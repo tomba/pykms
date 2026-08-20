@@ -36,6 +36,9 @@ Repository = 'https://github.com/tomba/pykms.git'
 [tool.setuptools]
 packages = ['kms', 'kms.uapi']
 
+[tool.pytest.ini_options]
+testpaths = ['tests']
+
 [tool.ruff]
 line-length = 100
 extend-exclude = ['kms/uapi/']
