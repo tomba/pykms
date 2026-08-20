@@ -33,7 +33,9 @@ class State:
 
         self.test_mode = 0
 
+
 # Test with direct mmap access
+
 
 def init_fbs_0(state: State):
     mmaps = []
@@ -48,8 +50,9 @@ def init_fbs_0(state: State):
     state.custom_state = {
         'mmaps': mmaps,
         'line_0': bytes([0] * (state.mode.hdisplay * 4)),
-        'line_1': bytes([0xff] * (state.mode.hdisplay * 4)),
+        'line_1': bytes([0xFF] * (state.mode.hdisplay * 4)),
     }
+
 
 def draw_fb_0(state: State, fb_idx: int, old_y):
     fb = state.fbs[fb_idx]
@@ -57,11 +60,12 @@ def draw_fb_0(state: State, fb_idx: int, old_y):
     m = state.custom_state['mmaps'][fb_idx][0]
     pitch = fb.planes[0].pitch
 
-    m[old_y * pitch:old_y * pitch + fb.width * 4] = state.custom_state['line_0']
-    m[state.bar_y * pitch:state.bar_y * pitch + fb.width * 4] = state.custom_state['line_1']
+    m[old_y * pitch : old_y * pitch + fb.width * 4] = state.custom_state['line_0']
+    m[state.bar_y * pitch : state.bar_y * pitch + fb.width * 4] = state.custom_state['line_1']
 
 
 # Test with mmap + numpy
+
 
 def init_fbs_1(state: State):
     numpybufs = []
@@ -80,10 +84,11 @@ def init_fbs_1(state: State):
         'numpybufs': numpybufs,
     }
 
+
 def draw_fb_1(state: State, fb_idx: int, old_y):
     b = state.custom_state['numpybufs'][fb_idx]
     b[old_y, :] = 0
-    b[state.bar_y, :] = 0xffffff
+    b[state.bar_y, :] = 0xFFFFFF
 
 
 def init_fbs(state: State):
@@ -94,6 +99,7 @@ def init_fbs(state: State):
     else:
         raise RuntimeError()
 
+
 def draw_fb(state: State, fb_idx: int, old_y):
     if state.test_mode == 0:
         draw_fb_0(state, fb_idx, old_y)
@@ -101,6 +107,7 @@ def draw_fb(state: State, fb_idx: int, old_y):
         draw_fb_1(state, fb_idx, old_y)
     else:
         raise RuntimeError()
+
 
 def handle_fps(state: State):
     ts = time.perf_counter()
@@ -116,20 +123,26 @@ def handle_fps(state: State):
 
         print(f'fps {fps:.2f}')
 
+
 def handle_pageflip(state: State):
     state.framenum += 1
 
     handle_fps(state)
 
-    #print("FLIP, cur", state.current_fb, "next", state.next_fb)
+    # print("FLIP, cur", state.current_fb, "next", state.next_fb)
 
     old_fb = state.current_fb
     state.current_fb = state.next_fb
     state.next_fb = (state.current_fb + 1) % len(state.fbs)
 
     req = kms.AtomicReq(state.card)
-    req.add_plane(state.plane, state.fbs[state.next_fb], state.crtc, dst=(0, 0, state.mode.hdisplay, state.mode.vdisplay))
-    req.commit(allow_modeset = False)
+    req.add_plane(
+        state.plane,
+        state.fbs[state.next_fb],
+        state.crtc,
+        dst=(0, 0, state.mode.hdisplay, state.mode.vdisplay),
+    )
+    req.commit(allow_modeset=False)
 
     old_y = state.bar_y - len(state.fbs) * state.bar_step
     if old_y < 0:
@@ -147,6 +160,7 @@ def handle_pageflip(state: State):
         state.bar_y += state.bar_step
         if state.bar_y >= state.mode.vdisplay:
             state.bar_y = 0
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -177,7 +191,7 @@ def main():
     req.add_crtc(crtc, state.modeb)
     req.add_plane(plane, state.fbs[2], crtc, dst=(0, 0, mode.hdisplay, mode.vdisplay))
 
-    req.commit(allow_modeset = True)
+    req.commit(allow_modeset=True)
 
     def readdrm(state: State):
         for ev in card.read_events():
@@ -198,6 +212,7 @@ def main():
         for key, _ in events:
             callback = key.data
             callback(state)
+
 
 if __name__ == '__main__':
     sys.exit(main())

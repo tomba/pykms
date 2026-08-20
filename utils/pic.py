@@ -23,8 +23,7 @@ fb = kms.DumbFramebuffer(card, mode.hdisplay, mode.vdisplay, format)
 kms.AtomicReq.set_mode(conn, crtc, fb, mode)
 
 image = Image.open(args.image)
-image = image.resize((mode.hdisplay, mode.vdisplay),
-                     Image.Resampling.LANCZOS)
+image = image.resize((mode.hdisplay, mode.vdisplay), Image.Resampling.LANCZOS)
 pixels = np.array(image)
 
 map = fb.map(0)

@@ -31,6 +31,7 @@ sys.argv = ['ctypesgen', *CTYPESGEN_OPTS, f'-I{INCLUDE_PATH}', f'-o{OUT}', *INCL
 
 main()
 
+
 def replace(filename, replaces):
     for r in replaces:
         pat = r[0]
@@ -44,16 +45,24 @@ def replace(filename, replaces):
         with open(filename, 'w', encoding='utf-8') as f:
             f.write(content)
 
+
 # Fix _IOC by using ord(type)
 
-replace(OUT, [
-        (re.escape('return ((((dir << _IOC_DIRSHIFT) | (type << _IOC_TYPESHIFT)) | (nr << _IOC_NRSHIFT)) | (size << _IOC_SIZESHIFT))'),
-         'return ((((dir << _IOC_DIRSHIFT) | (ord(type) << _IOC_TYPESHIFT)) | (nr << _IOC_NRSHIFT)) | (size << _IOC_SIZESHIFT))'),
-        ])
+replace(
+    OUT,
+    [
+        (
+            re.escape(
+                'return ((((dir << _IOC_DIRSHIFT) | (type << _IOC_TYPESHIFT)) | (nr << _IOC_NRSHIFT)) | (size << _IOC_SIZESHIFT))'
+            ),
+            'return ((((dir << _IOC_DIRSHIFT) | (ord(type) << _IOC_TYPESHIFT)) | (nr << _IOC_NRSHIFT)) | (size << _IOC_SIZESHIFT))',
+        ),
+    ],
+)
 
 # Add pylint ignore comment
 
-replace('kms/uapi/ctypes_preamble.py', [
-        (r'^def POINTER\(obj\):$',
-         'def POINTER(obj): # pylint: disable=function-redefined:')
-        ])
+replace(
+    'kms/uapi/ctypes_preamble.py',
+    [(r'^def POINTER\(obj\):$', 'def POINTER(obj): # pylint: disable=function-redefined:')],
+)

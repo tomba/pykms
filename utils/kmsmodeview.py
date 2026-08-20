@@ -131,20 +131,18 @@ class TimingPanel:
         self._on_changed = on_changed
 
         labels = {
-            'disp':  f'{prefix}disp ',
-            'fp':    f'{prefix}fp   ',
-            'sw':    f'{prefix}sw   ',
-            'bp':    f'{prefix}bp   ',
+            'disp': f'{prefix}disp ',
+            'fp': f'{prefix}fp   ',
+            'sw': f'{prefix}sw   ',
+            'bp': f'{prefix}bp   ',
             'disp2': f'{prefix}disp ',
-            'ss':    f'{prefix}ss   ',
-            'se':    f'{prefix}se   ',
-            'tot':   f'{prefix}tot  ',
+            'ss': f'{prefix}ss   ',
+            'se': f'{prefix}se   ',
+            'tot': f'{prefix}tot  ',
         }
         self.widgets = {role: IntEditPlus(labels[role]) for role in self._ROLES}
         for role, w in self.widgets.items():
-            urwid.connect_signal(
-                w, 'value_changed', self._on_value_changed, user_args=[role]
-            )
+            urwid.connect_signal(w, 'value_changed', self._on_value_changed, user_args=[role])
 
         col1 = [self.widgets[r] for r in ('disp', 'fp', 'sw', 'bp')]
         col2 = [self.widgets[r] for r in ('disp2', 'ss', 'se', 'tot')]
@@ -191,14 +189,14 @@ class TimingPanel:
     def render(self, source=None):
         disp, fp, sw, bp = self._get()
         values = {
-            'disp':  disp,
-            'fp':    fp,
-            'sw':    sw,
-            'bp':    bp,
+            'disp': disp,
+            'fp': fp,
+            'sw': sw,
+            'bp': bp,
             'disp2': disp,
-            'ss':    disp + fp,
-            'se':    disp + fp + sw,
-            'tot':   disp + fp + sw + bp,
+            'ss': disp + fp,
+            'se': disp + fp + sw,
+            'tot': disp + fp + sw + bp,
         }
         for role, w in self.widgets.items():
             if w is not source:
@@ -207,9 +205,12 @@ class TimingPanel:
 
 class FlagsPanel:
     _MANAGED = (
-        kms.ModeFlag.INTERLACE | kms.ModeFlag.DBLCLK |
-        kms.ModeFlag.HSYNC_POS | kms.ModeFlag.HSYNC_NEG |
-        kms.ModeFlag.VSYNC_POS | kms.ModeFlag.VSYNC_NEG
+        kms.ModeFlag.INTERLACE
+        | kms.ModeFlag.DBLCLK
+        | kms.ModeFlag.HSYNC_POS
+        | kms.ModeFlag.HSYNC_NEG
+        | kms.ModeFlag.VSYNC_POS
+        | kms.ModeFlag.VSYNC_NEG
     )
 
     def __init__(self, mode, on_changed):
@@ -230,9 +231,9 @@ class FlagsPanel:
         # urwid emits 'change' with the incoming state before applying it,
         # so use new_state for the source and current .state for the others.
         states = {
-            self.w_ilace:  self.w_ilace.state,
-            self.w_hsync:  self.w_hsync.state,
-            self.w_vsync:  self.w_vsync.state,
+            self.w_ilace: self.w_ilace.state,
+            self.w_hsync: self.w_hsync.state,
+            self.w_vsync: self.w_vsync.state,
             self.w_dblclk: self.w_dblclk.state,
         }
         states[widget] = new_state
@@ -241,12 +242,8 @@ class FlagsPanel:
             f |= kms.ModeFlag.INTERLACE
         if states[self.w_dblclk]:
             f |= kms.ModeFlag.DBLCLK
-        f |= tristate_to_flag(
-            states[self.w_hsync], kms.ModeFlag.HSYNC_POS, kms.ModeFlag.HSYNC_NEG
-        )
-        f |= tristate_to_flag(
-            states[self.w_vsync], kms.ModeFlag.VSYNC_POS, kms.ModeFlag.VSYNC_NEG
-        )
+        f |= tristate_to_flag(states[self.w_hsync], kms.ModeFlag.HSYNC_POS, kms.ModeFlag.HSYNC_NEG)
+        f |= tristate_to_flag(states[self.w_vsync], kms.ModeFlag.VSYNC_POS, kms.ModeFlag.VSYNC_NEG)
         self._mode.flags = f
         self._on_changed(source=widget)
 
@@ -274,14 +271,16 @@ class InfoPanel:
         self.w_frame_us = urwid.Text('')
         self.w_frame_khz = urwid.Text('')
         self.box = urwid.LineBox(
-            urwid.Pile([
-                self.w_line_us,
-                self.w_line_khz,
-                urwid.Divider(),
-                self.w_frame_tot,
-                self.w_frame_us,
-                self.w_frame_khz,
-            ]),
+            urwid.Pile(
+                [
+                    self.w_line_us,
+                    self.w_line_khz,
+                    urwid.Divider(),
+                    self.w_frame_tot,
+                    self.w_frame_us,
+                    self.w_frame_khz,
+                ]
+            ),
             title='Info',
         )
 
@@ -294,9 +293,7 @@ class InfoPanel:
         self.w_line_khz.set_text(f'line {div_or_zero(khz, htot):.2f} kHz')
         self.w_frame_tot.set_text(f'tot {htot * vtot} pix')
         self.w_frame_us.set_text(f'frame {line_us * vtot / 1000:.2f} ms')
-        self.w_frame_khz.set_text(
-            f'frame {div_or_zero(khz * 1000, htot * vtot):.2f} Hz'
-        )
+        self.w_frame_khz.set_text(f'frame {div_or_zero(khz * 1000, htot * vtot):.2f} Hz')
 
 
 class KmsModeView:
@@ -329,14 +326,16 @@ class KmsModeView:
             urwid.Padding(urwid.Button('apply', on_press=self._on_apply_press))
         )
 
-        main_pile = urwid.Pile([
-            modes_box,
-            self._pclk.box,
-            urwid.Columns([self._h.box, self._v.box]),
-            self._info.box,
-            self._flags.box,
-            apply_box,
-        ])
+        main_pile = urwid.Pile(
+            [
+                modes_box,
+                self._pclk.box,
+                urwid.Columns([self._h.box, self._v.box]),
+                self._info.box,
+                self._flags.box,
+                apply_box,
+            ]
+        )
 
         self._top = urwid.Filler(main_pile, valign='top')
 
@@ -362,7 +361,9 @@ class KmsModeView:
 
     def _apply_mode(self):
         self._fb = kms.DumbFramebuffer(
-            self._card, self._mode.hdisplay, self._mode.vdisplay,
+            self._card,
+            self._mode.hdisplay,
+            self._mode.vdisplay,
             kms.PixelFormats.XRGB8888,
         )
         kms.testpat.draw_test_pattern(self._fb)

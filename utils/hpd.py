@@ -21,6 +21,5 @@ for device in iter(monitor.poll, None):
         print('== HPD ==')
         for conn in connectors:
             conn.refresh_modes()
-            strs = (conn.fullname,
-                    ['{}x{}'.format(m.hdisplay, m.vdisplay) for m in conn.modes])
+            strs = (conn.fullname, ['{}x{}'.format(m.hdisplay, m.vdisplay) for m in conn.modes])
             pprint.pprint(strs, compact=True, width=120)

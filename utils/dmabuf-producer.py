@@ -22,6 +22,7 @@ FRAMEBUFFER_HEIGHT = 480
 FRAMEBUFFER_FORMAT = PixelFormats.XRGB8888
 FRAME_INTERVAL = 1 / 10
 
+
 def fill_random(fb: DumbFramebuffer):
     fb.begin_cpu_access('rw')
 
@@ -30,6 +31,7 @@ def fill_random(fb: DumbFramebuffer):
     buf[:] = random_data
 
     fb.end_cpu_access()
+
 
 def draw_line(fb: DumbFramebuffer, y: int):
     fb.begin_cpu_access('rw')
@@ -43,6 +45,7 @@ def draw_line(fb: DumbFramebuffer, y: int):
 
     fb.end_cpu_access()
 
+
 class FramebufferSource:
     framebuffers: list[DumbFramebuffer]
     free_fbs: list[int]
@@ -52,6 +55,7 @@ class FramebufferSource:
         self.framebuffers = framebuffers
         self.free_fbs = free_fbs
         self.sent_fbs = []
+
 
 def main():
     card = Card()
@@ -86,8 +90,16 @@ def main():
         # Send framebuffer metadata to consumer
         for fb_id, fb in enumerate(src.framebuffers):
             fb_fd = fb.fd(0)
-            metadata = struct.pack('iiiiiii', fb_id, fb_fd, fb.size(0), fb.format.drm_fourcc,
-                                fb.width, fb.height, fb.planes[0].pitch)
+            metadata = struct.pack(
+                'iiiiiii',
+                fb_id,
+                fb_fd,
+                fb.size(0),
+                fb.format.drm_fourcc,
+                fb.width,
+                fb.height,
+                fb.planes[0].pitch,
+            )
             socket.send_fds(client, [metadata], [fb_fd])
             print(f'Sent framebuffer metadata and fd {fb_fd} with id {fb_id}')
 
@@ -120,7 +132,9 @@ def main():
                         assert fb_id in src.sent_fbs
                         src.sent_fbs.remove(fb_id)
 
-                        print(f'Src{src_id} framebuffer {fb_id} returned. Free fbs {len(src.free_fbs)}')
+                        print(
+                            f'Src{src_id} framebuffer {fb_id} returned. Free fbs {len(src.free_fbs)}'
+                        )
 
                         # Fill received fb with random data, to see that the consumer is not using it
                         fill_random(src.framebuffers[fb_id])

@@ -36,11 +36,9 @@ def main():
         heap = DMAHeap(args.dmabuf)
         heap_buf = heap.alloc(fmt.framesize(width, height))
 
-        fb = kms.DmabufFramebuffer(card, width, height,
-                                   fmt,
-                                   fds=[ heap_buf.fd ],
-                                   pitches=[ fmt.stride(width) ],
-                                   offsets=[ 0 ])
+        fb = kms.DmabufFramebuffer(
+            card, width, height, fmt, fds=[heap_buf.fd], pitches=[fmt.stride(width)], offsets=[0]
+        )
     else:
         fb = kms.DumbFramebuffer(card, width, height, fmt)
 
@@ -59,9 +57,10 @@ def main():
     req.add_crtc(crtc, modeb)
     req.add_plane(plane, fb, crtc, dst=(0, 0, width, height))
 
-    req.commit_sync(allow_modeset = True)
+    req.commit_sync(allow_modeset=True)
 
     input('press enter to exit\n')
+
 
 if __name__ == '__main__':
     sys.exit(main())

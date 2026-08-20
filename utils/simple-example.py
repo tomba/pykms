@@ -28,16 +28,16 @@ map = fb.map(0)
 b = np.frombuffer(map, dtype=np.uint8).reshape(fb.height, fb.width, 4)
 
 # Red square in the top left corner
-b[:fb.height//2, :fb.width//2, :] = [0, 0, 255, 0]
+b[: fb.height // 2, : fb.width // 2, :] = [0, 0, 255, 0]
 
 # Green square in the top right corner
-b[:fb.height//2, fb.width//2:, :] = [0, 255, 0, 0]
+b[: fb.height // 2, fb.width // 2 :, :] = [0, 255, 0, 0]
 
 # Blue square in the bottom left corner
-b[fb.height//2:, :fb.width//2, :] = [255, 0, 0, 0]
+b[fb.height // 2 :, : fb.width // 2, :] = [255, 0, 0, 0]
 
 # White square in the bottom right corner
-b[fb.height//2:, fb.width//2:, :] = [255, 255, 255, 0]
+b[fb.height // 2 :, fb.width // 2 :, :] = [255, 255, 255, 0]
 
 kms.AtomicReq.set_mode(conn, crtc, fb, mode)
 

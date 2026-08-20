@@ -21,6 +21,7 @@ __all__ = [
     'Card',
 ]
 
+
 class Card:
     def __init__(self, dev_path: str | None = None) -> None:
         if not dev_path:
@@ -28,8 +29,9 @@ class Card:
 
         self.dev_path = dev_path
 
-        self.fio = io.FileIO(dev_path,
-                             opener=lambda name,_: os.open(name, os.O_RDWR | os.O_NONBLOCK))
+        self.fio = io.FileIO(
+            dev_path, opener=lambda name, _: os.open(name, os.O_RDWR | os.O_NONBLOCK)
+        )
 
         self.set_defaults()
         self.get_res()
@@ -145,9 +147,9 @@ class Card:
 
         fcntl.ioctl(self.fd, kms.uapi.DRM_IOCTL_MODE_GETRESOURCES, res, True)
 
-        self.crtcs = [Crtc(self, id, idx) for idx,id in enumerate(crtc_ids)]
-        self.connectors = [Connector(self, id, idx) for idx,id in enumerate(connector_ids)]
-        self.encoders = [Encoder(self, id, idx) for idx,id in enumerate(encoder_ids)]
+        self.crtcs = [Crtc(self, id, idx) for idx, id in enumerate(crtc_ids)]
+        self.connectors = [Connector(self, id, idx) for idx, id in enumerate(connector_ids)]
+        self.encoders = [Encoder(self, id, idx) for idx, id in enumerate(encoder_ids)]
 
     def get_plane_res(self):
         res = kms.uapi.drm_mode_get_plane_res()
@@ -158,10 +160,14 @@ class Card:
 
         fcntl.ioctl(self.fd, kms.uapi.DRM_IOCTL_MODE_GETPLANERESOURCES, res, True)
 
-        self.planes = [Plane(self, id, idx) for idx,id in enumerate(plane_ids)]
+        self.planes = [Plane(self, id, idx) for idx, id in enumerate(plane_ids)]
 
     def get_object(self, id):
-        return next(ob for ob in [*self.crtcs, *self.connectors, *self.encoders, *self.planes] if ob.id == id)
+        return next(
+            ob
+            for ob in [*self.crtcs, *self.connectors, *self.encoders, *self.planes]
+            if ob.id == id
+        )
 
     def get_connector(self, id):
         return next(ob for ob in self.connectors if ob.id == id)
@@ -190,7 +196,7 @@ class Card:
         return Framebuffer(self, res.fb_id, res.width, res.height, format, planes)
 
     def read_events(self) -> list[DrmEvent]:
-        assert(self.fio)
+        assert self.fio
 
         buf = self.event_buf
 
@@ -198,7 +204,7 @@ class Card:
         if not l:
             return []
 
-        assert (l >= ctypes.sizeof(kms.uapi.drm_event))
+        assert l >= ctypes.sizeof(kms.uapi.drm_event)
 
         events = []
 
@@ -206,17 +212,19 @@ class Card:
         while i < l:
             ev = kms.uapi.drm_event.from_buffer(buf, i)
 
-            #print(f'event type{ev.type}, len {ev.length}')
+            # print(f'event type{ev.type}, len {ev.length}')
 
             if ev.type == kms.uapi.DRM_EVENT_VBLANK:
                 raise NotImplementedError()
             elif ev.type == kms.uapi.DRM_EVENT_FLIP_COMPLETE:
                 vblank = kms.uapi.drm_event_vblank.from_buffer(buf, i)
-                #print(vblank.sequence, vblank.tv_sec, vblank.tv_usec, vblank.crtc_id, vblank.user_data)
+                # print(vblank.sequence, vblank.tv_sec, vblank.tv_usec, vblank.crtc_id, vblank.user_data)
 
                 time = vblank.tv_sec + vblank.tv_usec / 1000000.0
 
-                events.append(DrmEvent(DrmEventType.FLIP_COMPLETE, vblank.sequence, time, vblank.user_data))
+                events.append(
+                    DrmEvent(DrmEventType.FLIP_COMPLETE, vblank.sequence, time, vblank.user_data)
+                )
 
             elif ev.type == kms.uapi.DRM_EVENT_CRTC_SEQUENCE:
                 raise NotImplementedError()

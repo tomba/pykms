@@ -30,10 +30,7 @@ class GbmEglSurface:
         self.height = height
 
         self.gbm_surface = gbm_dev.create_surface(
-            width,
-            height,
-            GBM_FORMAT_XRGB8888,
-            GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING
+            width, height, GBM_FORMAT_XRGB8888, GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING
         )
 
         self.egl_surface = EglSurface(self.egl, self.gbm_surface.handle)
@@ -51,13 +48,7 @@ class GbmEglSurface:
 
     def _create_framebuffer(self, bo):
         return kms.ExtFramebuffer(
-            self.card,
-            bo.width,
-            bo.height,
-            kms.PixelFormats.XRGB8888,
-            [bo.handle],
-            [bo.stride],
-            [0]
+            self.card, bo.width, bo.height, kms.PixelFormats.XRGB8888, [bo.handle], [bo.stride], [0]
         )
 
     def _get_fb_for_bo(self, bo):
@@ -88,8 +79,9 @@ class GbmEglSurface:
 
 
 class OutputHandler:
-    def __init__(self, card, gbm_dev, egl_state, connector, crtc, mode, modeb, plane,
-                 rotation_mult=1.0):
+    def __init__(
+        self, card, gbm_dev, egl_state, connector, crtc, mode, modeb, plane, rotation_mult=1.0
+    ):
         self.frame_num = 0
         self.connector = connector
         self.crtc = crtc
@@ -113,7 +105,7 @@ class OutputHandler:
         req.add_connector(self.connector, self.crtc)
         req.add_crtc(self.crtc, self.modeb)
         req.add_plane(self.plane, fb, self.crtc, dst=(0, 0, fb.width, fb.height))
-        req.commit_sync(allow_modeset = True)
+        req.commit_sync(allow_modeset=True)
 
     def handle_page_flip(self, frame, cur_time):
         self.frame_num += 1
@@ -149,8 +141,7 @@ def main():
 
     rot_mult = 1.0
 
-    out = OutputHandler(card, gbm_dev, egl_state, conn, crtc, mode, modeb,
-                        plane, rot_mult)
+    out = OutputHandler(card, gbm_dev, egl_state, conn, crtc, mode, modeb, plane, rot_mult)
 
     out.setup()
     out.queue_next()

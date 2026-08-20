@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from kms import Card
 
-__all__ = [ 'DrmObject' ]
+__all__ = ['DrmObject']
+
 
 class DrmObject:
     def __init__(self, card: Card, id: int, type, idx: int) -> None:

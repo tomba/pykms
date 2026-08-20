@@ -16,7 +16,14 @@ import kms.uapi
 if TYPE_CHECKING:
     from kms import Card
 
-__all__ = ['CPUFramebuffer', 'DmabufFramebuffer', 'DumbFramebuffer', 'ExtFramebuffer', 'Framebuffer', 'IFramebuffer']
+__all__ = [
+    'CPUFramebuffer',
+    'DmabufFramebuffer',
+    'DumbFramebuffer',
+    'ExtFramebuffer',
+    'Framebuffer',
+    'IFramebuffer',
+]
 
 
 class IFramebuffer(ABC):
@@ -58,6 +65,7 @@ class IFramebuffer(ABC):
     def end_cpu_access(self) -> None:
         pass
 
+
 class Framebuffer(kms.DrmObject, IFramebuffer):
     class FramebufferPlane:
         def __init__(self) -> None:
@@ -68,7 +76,15 @@ class Framebuffer(kms.DrmObject, IFramebuffer):
             self.offset = 0
             self.map: mmap.mmap | None = None
 
-    def __init__(self, card: Card, id: int, width: int, height: int, format: kms.PixelFormat, planes: list[FramebufferPlane]) -> None:
+    def __init__(
+        self,
+        card: Card,
+        id: int,
+        width: int,
+        height: int,
+        format: kms.PixelFormat,
+        planes: list[FramebufferPlane],
+    ) -> None:
         super().__init__(card, id, kms.uapi.DRM_MODE_OBJECT_FB, -1)
 
         self._width = width
@@ -185,9 +201,13 @@ class DumbFramebuffer(Framebuffer):
             p.offset = map_dumb.offset
 
         if not p.map:
-            p.map = mmap.mmap(self.card.fd, p.size,
-                              mmap.MAP_SHARED, mmap.PROT_READ | mmap.PROT_WRITE,
-                              offset=p.offset)
+            p.map = mmap.mmap(
+                self.card.fd,
+                p.size,
+                mmap.MAP_SHARED,
+                mmap.PROT_READ | mmap.PROT_WRITE,
+                offset=p.offset,
+            )
 
         return p.map
 
@@ -228,8 +248,16 @@ class DmabufFramebuffer(Framebuffer):
     DMA_BUF_SYNC_START = 0 << 2
     DMA_BUF_SYNC_END = 1 << 2
 
-    def __init__(self, card: Card, width: int, height: int, format: kms.PixelFormat,
-                 fds: list[int], pitches: list[int], offsets: list[int]) -> None:
+    def __init__(
+        self,
+        card: Card,
+        width: int,
+        height: int,
+        format: kms.PixelFormat,
+        fds: list[int],
+        pitches: list[int],
+        offsets: list[int],
+    ) -> None:
         planes = []
 
         self._sync_flags = 0
@@ -288,8 +316,7 @@ class DmabufFramebuffer(Framebuffer):
         p = self.planes[plane_idx]
 
         if not p.map:
-            p.map = mmap.mmap(p.prime_fd, p.size,
-                              mmap.MAP_SHARED, mmap.PROT_READ | mmap.PROT_WRITE)
+            p.map = mmap.mmap(p.prime_fd, p.size, mmap.MAP_SHARED, mmap.PROT_READ | mmap.PROT_WRITE)
 
         return p.map
 
@@ -331,9 +358,18 @@ class DmabufFramebuffer(Framebuffer):
 
         self._sync_flags = 0
 
+
 class ExtFramebuffer(Framebuffer):
-    def __init__(self, card: Card, width: int, height: int, format: kms.PixelFormat,
-                 handles: list[int], pitches: list[int], offsets: list[int]):
+    def __init__(
+        self,
+        card: Card,
+        width: int,
+        height: int,
+        format: kms.PixelFormat,
+        handles: list[int],
+        pitches: list[int],
+        offsets: list[int],
+    ):
         planes = []
 
         for idx in range(len(format.planes)):

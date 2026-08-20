@@ -12,9 +12,12 @@ parser = argparse.ArgumentParser(description='Test display clocks for a KMS devi
 parser.add_argument('-c', '--connector', help='Specify the connector to use (default: auto-select)')
 parser.add_argument('-s', '--start', help='Starting pixel clock frequency (can use MHz/KHz suffix)')
 parser.add_argument('-e', '--end', help='Ending pixel clock frequency (can use MHz/KHz suffix)')
-parser.add_argument('-i', '--increment', help='Frequency increment step size (can use MHz/KHz suffix)')
+parser.add_argument(
+    '-i', '--increment', help='Frequency increment step size (can use MHz/KHz suffix)'
+)
 parser.add_argument('-t', '--time', type=float, help='Time in seconds to test each frequency')
 args = parser.parse_args()
+
 
 def parse_freq(freq_str):
     if freq_str is None:
@@ -28,6 +31,7 @@ def parse_freq(freq_str):
         return int(float(freq_str.replace('khz', '')) * 1000)
     else:
         return int(freq_str)
+
 
 args.start = parse_freq(args.start)
 args.end = parse_freq(args.end)

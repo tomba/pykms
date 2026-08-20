@@ -112,7 +112,9 @@ class GlScene:
 
         # Get uniform locations
         self.modelview_matrix_loc = gl.glGetUniformLocation(self.program, 'modelviewMatrix')
-        self.modelviewprojection_matrix_loc = gl.glGetUniformLocation(self.program, 'modelviewprojectionMatrix')
+        self.modelviewprojection_matrix_loc = gl.glGetUniformLocation(
+            self.program, 'modelviewprojectionMatrix'
+        )
         self.normal_matrix_loc = gl.glGetUniformLocation(self.program, 'normalMatrix')
 
         gl.glEnable(gl.GL_CULL_FACE)
@@ -125,52 +127,57 @@ class GlScene:
         size = 1.0
 
         # Define the 8 corners of a cube
-        corner_vertices = np.array([
-            # Front face corners (z+)
-            [-size, -size, size],  # bottom-left-front
-            [size, -size, size],   # bottom-right-front
-            [-size, size, size],   # top-left-front
-            [size, size, size],    # top-right-front
-
-            # Back face corners (z-)
-            [size, -size, -size],  # bottom-right-back
-            [-size, -size, -size], # bottom-left-back
-            [size, size, -size],   # top-right-back
-            [-size, size, -size],  # top-left-back
-        ])
+        corner_vertices = np.array(
+            [
+                # Front face corners (z+)
+                [-size, -size, size],  # bottom-left-front
+                [size, -size, size],  # bottom-right-front
+                [-size, size, size],  # top-left-front
+                [size, size, size],  # top-right-front
+                # Back face corners (z-)
+                [size, -size, -size],  # bottom-right-back
+                [-size, -size, -size],  # bottom-left-back
+                [size, size, -size],  # top-right-back
+                [-size, size, -size],  # top-left-back
+            ]
+        )
 
         # Define the 6 face normals
-        face_normals = np.array([
-            [0, 0, 1],    # front (+z)
-            [0, 0, -1],   # back (-z)
-            [1, 0, 0],    # right (+x)
-            [-1, 0, 0],   # left (-x)
-            [0, 1, 0],    # top (+y)
-            [0, -1, 0],   # bottom (-y)
-        ])
+        face_normals = np.array(
+            [
+                [0, 0, 1],  # front (+z)
+                [0, 0, -1],  # back (-z)
+                [1, 0, 0],  # right (+x)
+                [-1, 0, 0],  # left (-x)
+                [0, 1, 0],  # top (+y)
+                [0, -1, 0],  # bottom (-y)
+            ]
+        )
 
         # Define vertex indices for each face as triangle strips
         # Each face uses 4 vertices
         face_indices = [
-            [0, 1, 2, 3],   # front
-            [4, 5, 6, 7],   # back
-            [1, 4, 3, 6],   # right
-            [5, 0, 7, 2],   # left
-            [2, 3, 7, 6],   # top
-            [5, 4, 0, 1]    # bottom
+            [0, 1, 2, 3],  # front
+            [4, 5, 6, 7],  # back
+            [1, 4, 3, 6],  # right
+            [5, 0, 7, 2],  # left
+            [2, 3, 7, 6],  # top
+            [5, 4, 0, 1],  # bottom
         ]
 
         # Generate a color for each corner (RGB)
-        corner_colors = np.array([
-            [0, 0, 1],      # blue (bottom-left-front)
-            [1, 0, 1],      # magenta (bottom-right-front)
-            [0, 1, 1],      # cyan (top-left-front)
-            [1, 1, 1],      # white (top-right-front)
-            [1, 0, 0],      # red (bottom-right-back)
-            [0, 0, 0],      # black (bottom-left-back)
-            [1, 1, 0],      # yellow (top-right-back)
-            [0, 1, 0],      # green (top-left-back)
-        ])
+        corner_colors = np.array(
+            [
+                [0, 0, 1],  # blue (bottom-left-front)
+                [1, 0, 1],  # magenta (bottom-right-front)
+                [0, 1, 1],  # cyan (top-left-front)
+                [1, 1, 1],  # white (top-right-front)
+                [1, 0, 0],  # red (bottom-right-back)
+                [0, 0, 0],  # black (bottom-left-back)
+                [1, 1, 0],  # yellow (top-right-back)
+                [0, 1, 0],  # green (top-left-back)
+            ]
+        )
 
         # Initialize arrays for vertices, colors, and normals
         vertices = []
@@ -221,7 +228,7 @@ class GlScene:
         return vbo
 
     def _create_program(self):
-        vertex_shader_source = '''
+        vertex_shader_source = """
         uniform mat4 modelviewMatrix;
         uniform mat4 modelviewprojectionMatrix;
         uniform mat3 normalMatrix;
@@ -244,9 +251,9 @@ class GlScene:
             float diff = max(0.0, dot(vEyeNormal, vLightDir));
             vVaryingColor = vec4(diff * in_color, 1.0);
         }
-        '''
+        """
 
-        fragment_shader_source = '''
+        fragment_shader_source = """
         precision mediump float;
 
         varying vec4 vVaryingColor;
@@ -255,7 +262,7 @@ class GlScene:
         {
             gl_FragColor = vVaryingColor;
         }
-        '''
+        """
 
         # Compile vertex shader
         vertex_shader = gl.glCreateShader(gl.GL_VERTEX_SHADER)

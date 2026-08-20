@@ -23,9 +23,12 @@ def pixpat_buffer(fb: kms.IFramebuffer) -> pixpat.Buffer:
     )
 
 
-def draw_test_pattern(fb: kms.IFramebuffer, pattern: str | None = None,
-                      rec: pixpat.Rec = pixpat.Rec.BT601,
-                      color_range: pixpat.Range = pixpat.Range.FULL) -> None:
+def draw_test_pattern(
+    fb: kms.IFramebuffer,
+    pattern: str | None = None,
+    rec: pixpat.Rec = pixpat.Rec.BT601,
+    color_range: pixpat.Range = pixpat.Range.FULL,
+) -> None:
     """Draw a test pattern into ``fb`` using :func:`pixpat.draw_pattern`.
 
     Convenience one-liner. For per-pattern ``params`` or other customization,

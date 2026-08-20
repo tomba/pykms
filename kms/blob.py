@@ -11,7 +11,8 @@ import kms.uapi
 if TYPE_CHECKING:
     from kms import Card
 
-__all__ = [ 'Blob' ]
+__all__ = ['Blob']
+
 
 class Blob(kms.DrmObject):
     def __init__(self, card: Card, data) -> None:

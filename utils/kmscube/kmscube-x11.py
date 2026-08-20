@@ -33,8 +33,8 @@ class X11Window:
         # pyright only sees the base Extension type — cast for typed access.
         self.core = cast(xcffib.xproto.xprotoExtension, self.conn.core)
         self.setup = self.conn.get_setup()
-        self.screen = self.setup.roots[0] # type: ignore
-        self.xcb_fd =  self.conn.get_file_descriptor()
+        self.screen = self.setup.roots[0]  # type: ignore
+        self.xcb_fd = self.conn.get_file_descriptor()
 
         # Set up window dimensions
         if self.fullscreen:
@@ -47,47 +47,47 @@ class X11Window:
         # Create window
         self.window_id = self.conn.generate_id()
 
-        mask = (
-            xcffib.xproto.CW.OverrideRedirect |
-            xcffib.xproto.CW.EventMask
-        )
+        mask = xcffib.xproto.CW.OverrideRedirect | xcffib.xproto.CW.EventMask
 
         values = [
             0,  # Override redirect
-            xcffib.xproto.EventMask.Exposure |
-            xcffib.xproto.EventMask.KeyPress |
-            xcffib.xproto.EventMask.StructureNotify  # For resize events
+            xcffib.xproto.EventMask.Exposure
+            | xcffib.xproto.EventMask.KeyPress
+            | xcffib.xproto.EventMask.StructureNotify,  # For resize events
         ]
 
         self.core.CreateWindow(
             self.screen.root_depth,
             self.window_id,
             self.screen.root,
-            0, 0,                     # x, y
-            self.width, self.height,  # width, height
-            0,                        # border width
+            0,
+            0,  # x, y
+            self.width,
+            self.height,  # width, height
+            0,  # border width
             xcffib.xproto.WindowClass.InputOutput,
             self.screen.root_visual,
             mask,
-            values
+            values,
         )
 
         # Set up WM_DELETE_WINDOW protocol
-        self.wm_protocols = self.core.InternAtom(
-            False, len('WM_PROTOCOLS'), 'WM_PROTOCOLS'
-        ).reply().atom
+        self.wm_protocols = (
+            self.core.InternAtom(False, len('WM_PROTOCOLS'), 'WM_PROTOCOLS').reply().atom
+        )
 
-        self.wm_delete_window = self.core.InternAtom(
-            False, len('WM_DELETE_WINDOW'), 'WM_DELETE_WINDOW'
-        ).reply().atom
+        self.wm_delete_window = (
+            self.core.InternAtom(False, len('WM_DELETE_WINDOW'), 'WM_DELETE_WINDOW').reply().atom
+        )
 
         self.core.ChangeProperty(
             xcffib.xproto.PropMode.Replace,
             self.window_id,
             self.wm_protocols,
             xcffib.xproto.Atom.ATOM,
-            32, 1,
-            [self.wm_delete_window]
+            32,
+            1,
+            [self.wm_delete_window],
         )
 
         if self.fullscreen:
@@ -104,8 +104,7 @@ class X11Window:
         cookie = self.core.InternAtom(False, len(net_wm_state), net_wm_state)
         reply = cookie.reply()
 
-        cookie2 = self.core.InternAtom(False, len(net_wm_state_fullscreen),
-                                          net_wm_state_fullscreen)
+        cookie2 = self.core.InternAtom(False, len(net_wm_state_fullscreen), net_wm_state_fullscreen)
         reply2 = cookie2.reply()
 
         self.core.ChangeProperty(
@@ -113,8 +112,9 @@ class X11Window:
             self.window_id,
             reply.atom,
             xcffib.xproto.Atom.ATOM,
-            32, 1,
-            [reply2.atom]
+            32,
+            1,
+            [reply2.atom],
         )
 
     def process_x11_events(self):
@@ -129,13 +129,15 @@ class X11Window:
                     self.need_exit = True
 
             elif isinstance(event, xcffib.xproto.ConfigureNotifyEvent):
-                if (event.width != self.width or event.height != self.height):
+                if event.width != self.width or event.height != self.height:
                     self.width = event.width
                     self.height = event.height
                     self.gl_scene.set_viewport(self.width, self.height)
 
-            elif isinstance(event, xcffib.xproto.ClientMessageEvent) and \
-                 event.data.data32[0] == self.wm_delete_window:
+            elif (
+                isinstance(event, xcffib.xproto.ClientMessageEvent)
+                and event.data.data32[0] == self.wm_delete_window
+            ):
                 print('Exit due to window close')
                 self.need_exit = True
 
@@ -207,6 +209,7 @@ class X11Window:
         self.conn.flush()
         self.conn.disconnect()
 
+
 def main_x11(fullscreen: bool = False, num_frames: int | None = None):
     window = X11Window(fullscreen, num_frames)
 
@@ -223,6 +226,7 @@ def main_x11(fullscreen: bool = False, num_frames: int | None = None):
     window.main_loop(egl_state, egl_surface, gl_scene)
 
     window.cleanup()
+
 
 if __name__ == '__main__':
     main_x11()

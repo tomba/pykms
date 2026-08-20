@@ -11,6 +11,7 @@ def printi(indent: int, *args):
     print(' ' * indent, end='')
     print(*args)
 
+
 class Printer:
     def __init__(self, args: argparse.Namespace) -> None:
         self.opt_print_props = args.props
@@ -23,13 +24,16 @@ class Printer:
         if not self.opt_print_props:
             return
 
-        for p,val in o.props:
+        for p, val in o.props:
             if self.opt_prop_filter and not re.match(self.opt_prop_filter, p.name):
                 continue
             printi(indent, f'{p.name}: {val}')
 
     def print_connector(self, c: kms.Connector, indent: int):
-        printi(indent, f'Connector {c.idx} ({c.id}) {c.fullname} ({"connected" if c.connected else "disconnected"})')
+        printi(
+            indent,
+            f'Connector {c.idx} ({c.id}) {c.fullname} ({"connected" if c.connected else "disconnected"})',
+        )
         self.print_props(c, indent + 4)
 
     def print_encoder(self, e: kms.Encoder, indent: int):
@@ -41,7 +45,10 @@ class Printer:
         refresh = (m.clock * 1000.0) / (m.htotal * m.vtotal) * (2 if m.interlace else 1)
         refresh = round(refresh, 2)
 
-        printi(indent, f'Crtc {crtc.idx} ({crtc.id}) {m.hdisplay}x{m.vdisplay}@{refresh} {m.clock / 1000:.3f}')
+        printi(
+            indent,
+            f'Crtc {crtc.idx} ({crtc.id}) {m.hdisplay}x{m.vdisplay}@{refresh} {m.clock / 1000:.3f}',
+        )
 
         self.print_props(crtc, indent + 4)
 
@@ -56,17 +63,26 @@ class Printer:
         crtc_w = p.get_prop_value('CRTC_W')
         crtc_h = p.get_prop_value('CRTC_H')
 
-        printi(indent, f'Plane {p.idx} ({p.id}) fb-id {p.fb_id} ' +
-              f'{src_x},{src_y} {src_w}x{src_h} -> {crtc_x},{crtc_y} {crtc_w}x{crtc_h} ')
+        printi(
+            indent,
+            f'Plane {p.idx} ({p.id}) fb-id {p.fb_id} '
+            + f'{src_x},{src_y} {src_w}x{src_h} -> {crtc_x},{crtc_y} {crtc_w}x{crtc_h} ',
+        )
 
         self.print_props(p, indent + 4)
 
     def print_fb(self, fb: kms.Framebuffer, indent: int):
-        printi(indent, f'FB ({fb.id}) {fb.width}x{fb.height} {fb.format.name} pixel_align={fb.format.pixel_align} ')
+        printi(
+            indent,
+            f'FB ({fb.id}) {fb.width}x{fb.height} {fb.format.name} pixel_align={fb.format.pixel_align} ',
+        )
 
         for idx, p in enumerate(fb.planes):
             pi = fb.format.planes[idx]
-            printi(indent + 2, f'Plane {idx}: offset={p.offset} pitch={p.pitch} size={p.size} bytes_per_block={pi.bytes_per_block} pixels_per_block={pi.pixels_per_block} hsub={pi.hsub} vsub={pi.vsub}')
+            printi(
+                indent + 2,
+                f'Plane {idx}: offset={p.offset} pitch={p.pitch} size={p.size} bytes_per_block={pi.bytes_per_block} pixels_per_block={pi.pixels_per_block} hsub={pi.hsub} vsub={pi.vsub}',
+            )
 
     def print_card(self, card: kms.Card):
         ver = card.get_version()
@@ -94,7 +110,6 @@ class Printer:
                     if p.fb_id:
                         fb = card.get_framebuffer(p.fb_id)
                         self.print_fb(fb, 10)
-
 
 
 def main():

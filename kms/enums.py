@@ -6,10 +6,12 @@ import kms.uapi
 
 __all__ = ['EncoderType', 'PlaneType']
 
+
 class PlaneType(Enum):
     OVERLAY = kms.uapi.DRM_PLANE_TYPE_OVERLAY
     PRIMARY = kms.uapi.DRM_PLANE_TYPE_PRIMARY
     CURSOR = kms.uapi.DRM_PLANE_TYPE_CURSOR
+
 
 class EncoderType(Enum):
     NONE = kms.uapi.DRM_MODE_ENCODER_NONE

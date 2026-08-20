@@ -10,7 +10,10 @@ import kms.uapi
 if TYPE_CHECKING:
     from kms import Card, Crtc
 
-__all__ = [ 'Plane', ]
+__all__ = [
+    'Plane',
+]
+
 
 class Plane(kms.DrmPropObject):
     def __init__(self, card: Card, id, idx) -> None:
@@ -39,7 +42,7 @@ class Plane(kms.DrmPropObject):
         self.format_types = formats
         self.res = plane
 
-        #print(f"plane {id}: fb: {plane.fb_id}")
+        # print(f"plane {id}: fb: {plane.fb_id}")
 
     def __repr__(self) -> str:
         return f'Plane({self.id})'

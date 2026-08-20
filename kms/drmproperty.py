@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
 __all__ = ['DrmProperty', 'DrmPropertyType']
 
+
 class DrmPropertyType(Enum):
     RANGE = auto()
     ENUM = auto()

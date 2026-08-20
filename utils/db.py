@@ -23,7 +23,9 @@ def pixpat_sub_buffer(fb, x, width):
             raise ValueError(f'vbar x={x} not aligned to plane {i} hsub={info.hsub}')
         plane_x = x // info.hsub
         if plane_x % info.pixels_per_block != 0:
-            raise ValueError(f'vbar x={x} not aligned to plane {i} pixels_per_block={info.pixels_per_block}')
+            raise ValueError(
+                f'vbar x={x} not aligned to plane {i} pixels_per_block={info.pixels_per_block}'
+            )
         x_bytes = (plane_x // info.pixels_per_block) * info.bytes_per_block
         sub_planes.append(memoryview(fb.map(i))[x_bytes:])
 
@@ -69,8 +71,7 @@ class FlipHandler:
         self.time = 0
 
         for fb in (self.fb1, self.fb2):
-            pixpat.draw_pattern(kms.testpat.pixpat_buffer(fb), 'plain',
-                                params={'color': '000000'})
+            pixpat.draw_pattern(kms.testpat.pixpat_buffer(fb), 'plain', params={'color': '000000'})
 
     def handle_page_flip(self, frame, time):
         self.flips += 1
@@ -81,7 +82,9 @@ class FlipHandler:
         time_delta = time - self.time
         if time_delta >= 5:
             frame_delta = frame - self.frames
-            print(f'Frame rate: {frame_delta / time_delta:f} ({self.flips}/{frame_delta} frames in {time_delta:f} s)')
+            print(
+                f'Frame rate: {frame_delta / time_delta:f} ({self.flips}/{frame_delta} frames in {time_delta:f} s)'
+            )
 
             self.flips = 0
             self.frames = frame
@@ -109,8 +112,9 @@ class FlipHandler:
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--connector', default='')
-parser.add_argument('-f', '--format', dest='format', default='XRGB8888',
-                    help='Pixel format (default: XRGB8888)')
+parser.add_argument(
+    '-f', '--format', dest='format', default='XRGB8888', help='Pixel format (default: XRGB8888)'
+)
 args = parser.parse_args()
 
 fmt = PixelFormats.find_by_name(args.format)
@@ -127,6 +131,7 @@ kms.AtomicReq.set_mode(conn, crtc, fliphandler.fb1, mode)
 
 fliphandler.handle_page_flip(0, 0)
 
+
 def readdrm():
     for ev in card.read_events():
         if ev.type == kms.DrmEventType.FLIP_COMPLETE:
@@ -136,6 +141,7 @@ def readdrm():
 def readkey():
     sys.stdin.readline()
     sys.exit(0)
+
 
 sel = selectors.DefaultSelector()
 sel.register(card.fd, selectors.EVENT_READ, readdrm)

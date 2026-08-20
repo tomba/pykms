@@ -6,15 +6,16 @@ import itertools
 
 import kms.uapi
 
-__all__ = [ 'AtomicReq' ]
+__all__ = ['AtomicReq']
+
 
 class AtomicReq:
     def __init__(self, card: kms.Card) -> None:
         self.card = card
-        self.props = [] # (ob_id, prop_id, value)
+        self.props = []  # (ob_id, prop_id, value)
         self.debug_print = False
 
-    def commit(self, allow_modeset = False):
+    def commit(self, allow_modeset=False):
         flags = kms.uapi.DRM_MODE_PAGE_FLIP_EVENT | kms.uapi.DRM_MODE_ATOMIC_NONBLOCK
 
         if allow_modeset:
@@ -22,7 +23,7 @@ class AtomicReq:
 
         self._commit(flags)
 
-    def commit_sync(self, allow_modeset = False):
+    def commit_sync(self, allow_modeset=False):
         flags = 0
 
         if allow_modeset:
@@ -62,11 +63,11 @@ class AtomicReq:
         prop_ids = (kms.uapi.c_uint32 * num_props)()
         prop_values = (kms.uapi.c_uint64 * num_props)()
 
-        for idx,ob_id in enumerate(sorted(obj_prop_counts)):
+        for idx, ob_id in enumerate(sorted(obj_prop_counts)):
             objs[idx] = ob_id
             count_props[idx] = obj_prop_counts[ob_id]
 
-        for idx,p in enumerate(props):
+        for idx, p in enumerate(props):
             prop_id = p[1]
             prop_value = p[2]
 
@@ -96,7 +97,7 @@ class AtomicReq:
         if isinstance(ob, int):
             ob_id = ob
             ob = self.card.get_object(ob_id)
-            assert(isinstance(ob, kms.DrmPropObject))
+            assert isinstance(ob, kms.DrmPropObject)
         elif isinstance(ob, kms.DrmPropObject):
             ob_id = ob.id
         else:
@@ -132,21 +133,23 @@ class AtomicReq:
         else:
             self.add(crtc.id, {'ACTIVE': 0, 'MODE_ID': 0})
 
-    def add_plane(self, plane: kms.Plane,
-                  fb: kms.Framebuffer | None,
-                  crtc: kms.Crtc | None,
-                  src: tuple[int, int, int, int] | None=None,
-                  dst: tuple[int, int, int, int] | None=None,
-                  zpos: int | None=None,
-                  params: dict | None=None):
+    def add_plane(
+        self,
+        plane: kms.Plane,
+        fb: kms.Framebuffer | None,
+        crtc: kms.Crtc | None,
+        src: tuple[int, int, int, int] | None = None,
+        dst: tuple[int, int, int, int] | None = None,
+        zpos: int | None = None,
+        params: dict | None = None,
+    ):
         if not src and fb:
             src = (0, 0, fb.width, fb.height)
 
         if not dst:
             dst = src
 
-        m = {'FB_ID': fb.id if fb else 0,
-             'CRTC_ID': crtc.id if crtc else 0}
+        m = {'FB_ID': fb.id if fb else 0, 'CRTC_ID': crtc.id if crtc else 0}
 
         if src is not None:
             src_x = round(src[0] * 0x10000)
@@ -179,9 +182,13 @@ class AtomicReq:
         self.add(plane, m)
 
     @staticmethod
-    def set_mode(connector: kms.Connector, crtc: kms.Crtc,
-                 fb: kms.Framebuffer, mode: kms.VideoMode,
-                 plane: kms.Plane | None=None):
+    def set_mode(
+        connector: kms.Connector,
+        crtc: kms.Crtc,
+        fb: kms.Framebuffer,
+        mode: kms.VideoMode,
+        plane: kms.Plane | None = None,
+    ):
         """Set up a pipeline with the connector and the CRTC,
         using the given mode and framebuffer. A suitable plane
         will be automatically selected, unless provided explicitly."""
@@ -196,7 +203,7 @@ class AtomicReq:
         req.add_crtc(crtc, modeb)
         req.add_plane(plane, fb, crtc, dst=(0, 0, mode.hdisplay, mode.vdisplay))
 
-        req.commit_sync(allow_modeset = True)
+        req.commit_sync(allow_modeset=True)
 
     @staticmethod
     def disable_all(card: kms.Card):

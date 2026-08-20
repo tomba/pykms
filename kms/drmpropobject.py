@@ -10,7 +10,10 @@ import kms.uapi
 if TYPE_CHECKING:
     from kms import Card
 
-__all__ = [ 'DrmPropObject', ]
+__all__ = [
+    'DrmPropObject',
+]
+
 
 class DrmPropObject(kms.DrmObject):
     def __init__(self, card: Card, id, type, idx) -> None:
@@ -36,7 +39,7 @@ class DrmPropObject(kms.DrmObject):
 
     def get_prop_value(self, prop_name: str):
         prop_id = self.card.find_property_id(self, prop_name)
-        assert(prop_id in self.prop_values)
+        assert prop_id in self.prop_values
         return self.prop_values[prop_id]
 
     def set_prop(self, prop, value):
@@ -52,7 +55,7 @@ class DrmPropObject(kms.DrmObject):
     @property
     def props(self):
         l = []
-        for pid,val in self.prop_values.items():
+        for pid, val in self.prop_values.items():
             prop = self.card.find_property(pid)
             l.append((prop, prop.conv_raw_to_val(val)))
         return l

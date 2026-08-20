@@ -11,6 +11,7 @@ def exit_handler():
     print('Press enter to exit program')
     sys.stdin.readline()
 
+
 atexit.register(exit_handler)
 
 card = kms.Card()
@@ -35,7 +36,7 @@ planes = [p1, p2, p3, p4]
 w = 500
 h = 500
 
-fbs=[]
+fbs = []
 
 for i in range(len(planes)):
     fb = kms.DumbFramebuffer(card, w, h, kms.PixelFormats.ARGB8888)
@@ -59,36 +60,39 @@ req.add_plane(planes[1], fbs[1], dp_crtc, zpos=0)
 req.add_plane(planes[2], fbs[2], hdmi_crtc, zpos=0)
 req.add_plane(planes[3], fbs[3], hdmi_crtc, zpos=0)
 
-req.commit_sync(allow_modeset = True)
-
+req.commit_sync(allow_modeset=True)
 
 
 def setz(p: kms.Plane, z: int):
     p.set_prop('zpos', z)
+
 
 def pr():
     for p in planes:
         p.refresh_props()
         print(f'{p.idx}: {p.plane_type}, zpos = {p.get_prop_value("zpos")}')
 
+
 pr()
 
 
-print('press enter'); sys.stdin.readline()
+print('press enter')
+sys.stdin.readline()
 
-#req = kms.AtomicReq(card)
-#req.add(dp_crtc, 'ACTIVE', 0)
-#req.add(hdmi_crtc, 'ACTIVE', 0)
-#req.commit_sync(allow_modeset = True)
-#print("press enter"); sys.stdin.readline()
+# req = kms.AtomicReq(card)
+# req.add(dp_crtc, 'ACTIVE', 0)
+# req.add(hdmi_crtc, 'ACTIVE', 0)
+# req.commit_sync(allow_modeset = True)
+# print("press enter"); sys.stdin.readline()
 
 req = kms.AtomicReq(card)
 req.add_plane(planes[0], None, None)
 req.add_plane(planes[1], None, None)
 req.add_plane(planes[2], None, None)
 req.add_plane(planes[3], None, None)
-req.commit_sync(allow_modeset = False)
-print('press enter'); sys.stdin.readline()
+req.commit_sync(allow_modeset=False)
+print('press enter')
+sys.stdin.readline()
 
 
 req = kms.AtomicReq(card)
@@ -98,19 +102,20 @@ req.add_plane(planes[1], fbs[1], hdmi_crtc, zpos=0)
 req.add_plane(planes[2], fbs[2], dp_crtc, zpos=0)
 req.add_plane(planes[3], fbs[3], dp_crtc, zpos=0)
 
-req.commit_sync(allow_modeset = False)
-print('press enter'); sys.stdin.readline()
+req.commit_sync(allow_modeset=False)
+print('press enter')
+sys.stdin.readline()
 
-#req = kms.AtomicReq(card)
+# req = kms.AtomicReq(card)
 ##req.add(dp_crtc, 'ACTIVE', 1)
 ##req.add(hdmi_crtc, 'ACTIVE', 1)
-#req.add_plane(planes[0], fbs[0], hdmi_crtc, zpos=0)
+# req.add_plane(planes[0], fbs[0], hdmi_crtc, zpos=0)
 ##req.add_plane(planes[1], fbs[1], hdmi_crtc, zpos=0)
 ##req.add_plane(planes[2], fbs[2], dp_crtc, zpos=0)
 ##req.add_plane(planes[3], fbs[3], dp_crtc, zpos=0)
-#req.commit_sync(allow_modeset = False)
-#print("press enter"); sys.stdin.readline()
+# req.commit_sync(allow_modeset = False)
+# print("press enter"); sys.stdin.readline()
 
 
-#import IPython
-#IPython.embed(banner1='', confirm_exit=False)
+# import IPython
+# IPython.embed(banner1='', confirm_exit=False)

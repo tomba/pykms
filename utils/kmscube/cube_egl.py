@@ -16,7 +16,7 @@ def _print_egl_config(egl_display, config):
         egl.EGL_DEPTH_SIZE: 'DEPTH_SIZE',
         egl.EGL_STENCIL_SIZE: 'STENCIL_SIZE',
         egl.EGL_SURFACE_TYPE: 'SURFACE_TYPE',
-        egl.EGL_RENDERABLE_TYPE: 'RENDERABLE_TYPE'
+        egl.EGL_RENDERABLE_TYPE: 'RENDERABLE_TYPE',
     }
 
     values = {}
@@ -33,6 +33,7 @@ def get_egl_string(dpy, name):
     if not s:
         return ''
     return s.decode()
+
 
 class EglState:
     def __init__(self, native_display, native_visual_id=0):
@@ -53,13 +54,19 @@ class EglState:
 
         # Configure attributes
         config_attribs = [
-            egl.EGL_SURFACE_TYPE, egl.EGL_WINDOW_BIT,
-            egl.EGL_RED_SIZE, 8,
-            egl.EGL_GREEN_SIZE, 8,
-            egl.EGL_BLUE_SIZE, 8,
-            egl.EGL_ALPHA_SIZE, 8,
-            egl.EGL_RENDERABLE_TYPE, egl.EGL_OPENGL_ES2_BIT,
-            egl.EGL_NONE
+            egl.EGL_SURFACE_TYPE,
+            egl.EGL_WINDOW_BIT,
+            egl.EGL_RED_SIZE,
+            8,
+            egl.EGL_GREEN_SIZE,
+            8,
+            egl.EGL_BLUE_SIZE,
+            8,
+            egl.EGL_ALPHA_SIZE,
+            8,
+            egl.EGL_RENDERABLE_TYPE,
+            egl.EGL_OPENGL_ES2_BIT,
+            egl.EGL_NONE,
         ]
 
         # Get all matching configs
@@ -69,7 +76,9 @@ class EglState:
 
         configs = (egl.EGLConfig * num_configs.value)()
         num_matched = ctypes.c_int()
-        if not egl.eglChooseConfig(self.display, config_attribs, configs, num_configs.value, num_matched):
+        if not egl.eglChooseConfig(
+            self.display, config_attribs, configs, num_configs.value, num_matched
+        ):
             raise RuntimeError('Failed to choose EGL config')
 
         if num_matched.value < 1:
@@ -77,10 +86,11 @@ class EglState:
 
         # Find config matching native_visual_id if specified
         self.config = None
-        for cfg in configs[:num_matched.value]:
+        for cfg in configs[: num_matched.value]:
             vid = ctypes.c_long()
-            if egl.eglGetConfigAttrib(self.display, cfg, egl.EGL_NATIVE_VISUAL_ID, vid) and \
-               (vid.value == native_visual_id or not native_visual_id):
+            if egl.eglGetConfigAttrib(self.display, cfg, egl.EGL_NATIVE_VISUAL_ID, vid) and (
+                vid.value == native_visual_id or not native_visual_id
+            ):
                 self.config = cfg
                 break
 
@@ -88,27 +98,30 @@ class EglState:
             raise RuntimeError('Failed to find matching EGL config')
 
         # Create OpenGL ES 2.0 context
-        context_attribs = [
-            egl.EGL_CONTEXT_CLIENT_VERSION, 2,
-            egl.EGL_NONE
-        ]
+        context_attribs = [egl.EGL_CONTEXT_CLIENT_VERSION, 2, egl.EGL_NONE]
 
         if not egl.eglBindAPI(egl.EGL_OPENGL_ES_API):
             raise RuntimeError('Failed to bind OpenGL ES API')
 
-        self.context = egl.eglCreateContext(self.display, self.config, egl.EGL_NO_CONTEXT, context_attribs)
+        self.context = egl.eglCreateContext(
+            self.display, self.config, egl.EGL_NO_CONTEXT, context_attribs
+        )
         if not self.context:
             raise RuntimeError('Failed to create EGL context')
 
         # Initial make current without a surface
-        if not egl.eglMakeCurrent(self.display, egl.EGL_NO_SURFACE, egl.EGL_NO_SURFACE, self.context):
+        if not egl.eglMakeCurrent(
+            self.display, egl.EGL_NO_SURFACE, egl.EGL_NO_SURFACE, self.context
+        ):
             raise RuntimeError('Failed to make EGL context current')
 
 
 class EglSurface:
     def __init__(self, egl_state: EglState, native_window):
         self.egl = egl_state
-        self.surface = egl.eglCreateWindowSurface(self.egl.display, self.egl.config, native_window, None)
+        self.surface = egl.eglCreateWindowSurface(
+            self.egl.display, self.egl.config, native_window, None
+        )
         if not self.surface:
             raise RuntimeError('Failed to create EGL surface')
 

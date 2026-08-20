@@ -28,9 +28,10 @@ def test_fmt(conn, crtc, plane, mode, modeb, fmt):
     req.add_crtc(crtc, modeb)
     req.add_plane(plane, fb, crtc, dst=(0, 0, mode.hdisplay, mode.vdisplay))
 
-    req.commit_sync(allow_modeset = True)
+    req.commit_sync(allow_modeset=True)
 
     input('press enter to continue\n')
+
 
 def tests(conn, crtc, plane, mode, formats):
     print(f'Test formats: {[fmt.name for fmt in formats]}')
@@ -43,6 +44,7 @@ def tests(conn, crtc, plane, mode, formats):
         print(f'Test {fmt}')
 
         test_fmt(conn, crtc, plane, mode, modeb, fmt)
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -72,6 +74,7 @@ def main():
     tests(conn, crtc, plane, mode, formats)
 
     print('all done')
+
 
 if __name__ == '__main__':
     sys.exit(main())

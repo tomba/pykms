@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import kms.uapi
 
-__all__ = [ 'ResourceManager' ]
+__all__ = ['ResourceManager']
+
 
 class ResourceManager:
     def __init__(self, card: kms.Card) -> None:
@@ -85,7 +86,7 @@ class ResourceManager:
 
         raise RuntimeError('Crtc not found')
 
-    def reserve_plane(self, crtc: kms.Crtc, format: kms.PixelFormat | None=None, plane_type=None):
+    def reserve_plane(self, crtc: kms.Crtc, format: kms.PixelFormat | None = None, plane_type=None):
         for plane in crtc.iter_planes(format, plane_type):
             if plane in self.reserved_planes:
                 continue
@@ -97,13 +98,13 @@ class ResourceManager:
         raise RuntimeError('Plane not found')
 
     # Deprecated
-    def reserve_generic_plane(self, crtc: kms.Crtc, format: kms.PixelFormat | None=None):
+    def reserve_generic_plane(self, crtc: kms.Crtc, format: kms.PixelFormat | None = None):
         return self.reserve_plane(crtc, format)
 
     # Deprecated
-    def reserve_primary_plane(self, crtc: kms.Crtc, format: kms.PixelFormat | None=None):
+    def reserve_primary_plane(self, crtc: kms.Crtc, format: kms.PixelFormat | None = None):
         return self.reserve_plane(crtc, format, kms.PlaneType.PRIMARY)
 
     # Deprecated
-    def reserve_overlay_plane(self, crtc: kms.Crtc, format: kms.PixelFormat | None=None):
+    def reserve_overlay_plane(self, crtc: kms.Crtc, format: kms.PixelFormat | None = None):
         return self.reserve_plane(crtc, format, kms.PlaneType.OVERLAY)

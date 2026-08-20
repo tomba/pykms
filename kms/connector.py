@@ -10,7 +10,10 @@ import kms.uapi
 if TYPE_CHECKING:
     from kms import Card
 
-__all__ = [ 'Connector', ]
+__all__ = [
+    'Connector',
+]
+
 
 class Connector(kms.DrmPropObject):
     connector_names: ClassVar[dict[int, str]] = {
@@ -61,11 +64,14 @@ class Connector(kms.DrmPropObject):
 
         self.fullname = f'{Connector.connector_names[res.connector_type]}-{res.connector_type_id}'
 
-        #print(f"connector {id}: type: {res.connector_type}, num_modes: {len(self.modes)}")
+        # print(f"connector {id}: type: {res.connector_type}, num_modes: {len(self.modes)}")
 
     @property
     def connected(self):
-        return self.connector_res.connection in (kms.uapi.DRM_MODE_CONNECTED, kms.uapi.DRM_MODE_UNKNOWNCONNECTION)
+        return self.connector_res.connection in (
+            kms.uapi.DRM_MODE_CONNECTED,
+            kms.uapi.DRM_MODE_UNKNOWNCONNECTION,
+        )
 
     def refresh_modes(self):
         res = kms.uapi.drm_mode_get_connector(connector_id=self.id)

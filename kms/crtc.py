@@ -9,7 +9,10 @@ import kms.uapi
 if TYPE_CHECKING:
     from kms import Card
 
-__all__ = [ 'Crtc', ]
+__all__ = [
+    'Crtc',
+]
+
 
 class Crtc(kms.DrmPropObject):
     def __init__(self, card: Card, id, idx) -> None:
@@ -22,7 +25,7 @@ class Crtc(kms.DrmPropObject):
         fcntl.ioctl(card.fd, kms.uapi.DRM_IOCTL_MODE_GETCRTC, res, True)
         self.crtc_res = res
 
-        #print(f"CRTC {id}: fb: {res.fb_id}")
+        # print(f"CRTC {id}: fb: {res.fb_id}")
 
     def __repr__(self) -> str:
         return f'Crtc({self.id})'
@@ -36,10 +39,19 @@ class Crtc(kms.DrmPropObject):
 
     @property
     def primary_plane(self):
-        plane = next((p for p in self.get_possible_planes() if p.type == kms.PlaneType.PRIMARY and p.crtc_id == self.id), None)
+        plane = next(
+            (
+                p
+                for p in self.get_possible_planes()
+                if p.type == kms.PlaneType.PRIMARY and p.crtc_id == self.id
+            ),
+            None,
+        )
         if plane:
             return plane
-        plane = next((p for p in self.get_possible_planes() if p.type == kms.PlaneType.PRIMARY), None)
+        plane = next(
+            (p for p in self.get_possible_planes() if p.type == kms.PlaneType.PRIMARY), None
+        )
         if plane:
             return plane
         plane = next((p for p in self.get_possible_planes()), None)
@@ -47,7 +59,7 @@ class Crtc(kms.DrmPropObject):
             return plane
         raise RuntimeError('No primary plane')
 
-    def iter_planes(self, format: kms.PixelFormat | None=None, plane_type=None):
+    def iter_planes(self, format: kms.PixelFormat | None = None, plane_type=None):
         for plane in self.get_possible_planes():
             # Return Cursor planes only if specifically requested
             if not plane_type and plane.plane_type == kms.PlaneType.CURSOR:
