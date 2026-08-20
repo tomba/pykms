@@ -25,7 +25,7 @@ CTYPESGEN_OPTS = (
 )
 
 sys.path.insert(0, CTYPESGEN_PATH)
-from ctypesgen.__main__ import main  # pylint: disable=E,C # type: ignore  # noqa: E402
+from ctypesgen.__main__ import main  # type: ignore  # noqa: E402
 
 sys.argv = ['ctypesgen', *CTYPESGEN_OPTS, f'-I{INCLUDE_PATH}', f'-o{OUT}', *INCLUDES]
 
@@ -58,11 +58,4 @@ replace(
             'return ((((dir << _IOC_DIRSHIFT) | (ord(type) << _IOC_TYPESHIFT)) | (nr << _IOC_NRSHIFT)) | (size << _IOC_SIZESHIFT))',
         ),
     ],
-)
-
-# Add pylint ignore comment
-
-replace(
-    'kms/uapi/ctypes_preamble.py',
-    [(r'^def POINTER\(obj\):$', 'def POINTER(obj): # pylint: disable=function-redefined:')],
 )
