@@ -60,7 +60,10 @@ extras = [
     'numpy',
     'Pillow',
     'pyudev',
-    'urwid',
+    # urwid 4.x containers type widget_list with structural protocols that
+    # urwid's own widgets fail (WidgetMeta rebinds rows() with a signature
+    # that doesn't match AbstractFlowWidget), breaking pyright. Pin until fixed.
+    'urwid<4',
     'xcffib',
     'pygbm @ git+https://github.com/tomba/pygbm.git',
     'pixpat @ git+https://github.com/tomba/pixpat.git',
