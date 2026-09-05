@@ -74,7 +74,10 @@ class Framebuffer(DrmObject, IFramebuffer):
             self.pitch = 0
             self.size = 0
             self.prime_fd = -1
+            # Offset of the plane data inside the buffer, as passed to ADDFB2
             self.offset = 0
+            # Offset to pass to mmap(), for buffers that need a MAP_DUMB ioctl to get one
+            self.map_offset: int | None = None
             self.map: mmap.mmap | None = None
 
     def __init__(
@@ -195,11 +198,14 @@ class DumbFramebuffer(Framebuffer):
     def map(self, plane_idx):
         p = self.planes[plane_idx]
 
-        if p.offset == 0:
+        map_offset = p.map_offset
+
+        if map_offset is None:
             map_dumb = kms.uapi.struct_drm_mode_map_dumb()
             map_dumb.handle = p.handle
             fcntl.ioctl(self.card.fd, kms.uapi.DRM_IOCTL_MODE_MAP_DUMB, map_dumb, True)
-            p.offset = map_dumb.offset
+            map_offset = int(map_dumb.offset)
+            p.map_offset = map_offset
 
         if not p.map:
             p.map = mmap.mmap(
@@ -207,7 +213,7 @@ class DumbFramebuffer(Framebuffer):
                 p.size,
                 mmap.MAP_SHARED,
                 mmap.PROT_READ | mmap.PROT_WRITE,
-                offset=p.offset,
+                offset=map_offset,
             )
 
         return p.map
