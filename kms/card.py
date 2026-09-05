@@ -111,8 +111,7 @@ class Card:
 
     def set_defaults(self):
         try:
-            fcntl.ioctl(self.fd, kms.uapi.DRM_IOCTL_SET_MASTER, 0, False)
-            self.is_master = True
+            self.set_master()
         except OSError:
             self.is_master = False
 
@@ -135,8 +134,13 @@ class Card:
         client_cap = kms.uapi.drm_set_client_cap(capability, value)
         fcntl.ioctl(self.fd, kms.uapi.DRM_IOCTL_SET_CLIENT_CAP, client_cap, True)
 
+    def set_master(self):
+        fcntl.ioctl(self.fd, kms.uapi.DRM_IOCTL_SET_MASTER, 0, False)
+        self.is_master = True
+
     def drop_master(self):
         fcntl.ioctl(self.fd, kms.uapi.DRM_IOCTL_DROP_MASTER, 0, False)
+        self.is_master = False
 
     def get_version(self) -> Version:
         ver = kms.uapi.drm_version()
