@@ -51,14 +51,23 @@ class ResourceManager:
 
         name = name.lower()
 
-        for c in self.card.connectors:
-            if name not in c.fullname.lower():
-                continue
+        # Prefer an exact match, then a prefix match, then a substring match,
+        # so that e.g. 'dp' does not pick 'eDP-1' over 'DP-1'.
+        matchers = (
+            lambda fullname: fullname == name,
+            lambda fullname: fullname.startswith(name),
+            lambda fullname: name in fullname,
+        )
 
-            if c in self.reserved_connectors:
-                raise RuntimeError('Connector already reserved')
+        for matcher in matchers:
+            for c in self.card.connectors:
+                if not matcher(c.fullname.lower()):
+                    continue
 
-            return c
+                if c in self.reserved_connectors:
+                    raise RuntimeError('Connector already reserved')
+
+                return c
 
         raise RuntimeError(f"Connector '{name}' not found")
 
