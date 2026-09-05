@@ -27,10 +27,10 @@ hdmi_crtc = res.reserve_crtc(hdmi)
 hdmi_mode = hdmi.get_default_mode()
 hdmi_modeb = hdmi_mode.to_blob(card)
 
-p1 = res.reserve_generic_plane(dp_crtc)
-p2 = res.reserve_generic_plane(dp_crtc)
-p3 = res.reserve_generic_plane(hdmi_crtc)
-p4 = res.reserve_generic_plane(hdmi_crtc)
+p1 = res.reserve_plane(dp_crtc)
+p2 = res.reserve_plane(dp_crtc)
+p3 = res.reserve_plane(hdmi_crtc)
+p4 = res.reserve_plane(hdmi_crtc)
 planes = [p1, p2, p3, p4]
 
 w = 500

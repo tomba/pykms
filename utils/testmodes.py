@@ -16,7 +16,7 @@ card = kms.Card(f'/dev/dri/card{args.card}' if args.card is not None else None)
 res = kms.ResourceManager(card)
 conn = res.reserve_connector(args.connector)
 crtc = res.reserve_crtc(conn)
-plane = res.reserve_generic_plane(crtc)
+plane = res.reserve_plane(crtc)
 
 print(f'Using card {card}, connector {conn}, crtc {crtc}, plane {plane}')
 

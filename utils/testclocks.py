@@ -42,7 +42,7 @@ card = kms.Card()
 res = kms.ResourceManager(card)
 conn = res.reserve_connector(args.connector)
 crtc = res.reserve_crtc(conn)
-plane = res.reserve_generic_plane(crtc)
+plane = res.reserve_plane(crtc)
 
 kms.AtomicReq.disable_all(card)
 

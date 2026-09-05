@@ -132,7 +132,7 @@ def main():
     res = kms.ResourceManager(card)
     conn = res.reserve_connector()
     crtc = res.reserve_crtc(conn)
-    plane = res.reserve_generic_plane(crtc)
+    plane = res.reserve_plane(crtc)
     mode = conn.get_default_mode()
     modeb = mode.to_blob(card)
 

@@ -28,7 +28,7 @@ else:
 planes = []
 
 for i in range(max_planes):
-    p = res.reserve_generic_plane(crtc)
+    p = res.reserve_plane(crtc)
     if p is None:
         break
     planes.append(p)
