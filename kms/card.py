@@ -267,24 +267,29 @@ class Card:
         while i < l:
             ev = kms.uapi.drm_event.from_buffer(buf, i)
 
-            # print(f'event type{ev.type}, len {ev.length}')
-
-            if ev.type == kms.uapi.DRM_EVENT_VBLANK:
-                raise NotImplementedError()
-            elif ev.type == kms.uapi.DRM_EVENT_FLIP_COMPLETE:
+            if ev.type in (kms.uapi.DRM_EVENT_VBLANK, kms.uapi.DRM_EVENT_FLIP_COMPLETE):
                 vblank = kms.uapi.drm_event_vblank.from_buffer(buf, i)
-                # print(vblank.sequence, vblank.tv_sec, vblank.tv_usec, vblank.crtc_id, vblank.user_data)
+
+                if ev.type == kms.uapi.DRM_EVENT_VBLANK:
+                    ev_type = DrmEventType.VBLANK
+                else:
+                    ev_type = DrmEventType.FLIP_COMPLETE
 
                 time = vblank.tv_sec + vblank.tv_usec / 1000000.0
 
                 events.append(
-                    DrmEvent(DrmEventType.FLIP_COMPLETE, vblank.sequence, time, vblank.user_data)
+                    DrmEvent(ev_type, vblank.sequence, time, vblank.user_data, vblank.crtc_id)
+                )
+            elif ev.type == kms.uapi.DRM_EVENT_CRTC_SEQUENCE:
+                seq = kms.uapi.drm_event_crtc_sequence.from_buffer(buf, i)
+
+                time = seq.time_ns / 1000000000.0
+
+                events.append(
+                    DrmEvent(DrmEventType.CRTC_SEQUENCE, seq.sequence, time, seq.user_data)
                 )
 
-            elif ev.type == kms.uapi.DRM_EVENT_CRTC_SEQUENCE:
-                raise NotImplementedError()
-            else:
-                raise NotImplementedError()
+            # Unknown event types are skipped
 
             i += ev.length
 
