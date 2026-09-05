@@ -8,7 +8,7 @@ import weakref
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
-import pixutils.ioctl
+from pixutils.dmabuf import DmaBufSyncFlags, dmabuf_sync
 
 import kms
 import kms.uapi
@@ -263,19 +263,6 @@ class DumbFramebuffer(Framebuffer):
 
 
 class DmabufFramebuffer(Framebuffer):
-    class struct_dma_buf_sync(ctypes.Structure):
-        __slots__ = ['flags']
-        _fields_ = [('flags', ctypes.c_uint64)]
-
-    DMA_BUF_BASE = 'b'
-    DMA_BUF_IOCTL_SYNC = pixutils.ioctl.IOW(DMA_BUF_BASE, 0, struct_dma_buf_sync)
-
-    DMA_BUF_SYNC_READ = 1 << 0
-    DMA_BUF_SYNC_WRITE = 2 << 0
-    DMA_BUF_SYNC_RW = DMA_BUF_SYNC_READ | DMA_BUF_SYNC_WRITE
-    DMA_BUF_SYNC_START = 0 << 2
-    DMA_BUF_SYNC_END = 1 << 2
-
     def __init__(
         self,
         card: Card,
@@ -288,7 +275,7 @@ class DmabufFramebuffer(Framebuffer):
     ) -> None:
         planes = []
 
-        self._sync_flags = 0
+        self._sync_flags = DmaBufSyncFlags(0)
 
         dup_fds = []
 
@@ -358,31 +345,25 @@ class DmabufFramebuffer(Framebuffer):
             raise RuntimeError('begin_cpu sync already started')
 
         if access == 'r':
-            self._sync_flags = DmabufFramebuffer.DMA_BUF_SYNC_READ
+            self._sync_flags = DmaBufSyncFlags.READ
         elif access == 'w':
-            self._sync_flags = DmabufFramebuffer.DMA_BUF_SYNC_WRITE
+            self._sync_flags = DmaBufSyncFlags.WRITE
         elif access == 'rw':
-            self._sync_flags = DmabufFramebuffer.DMA_BUF_SYNC_RW
+            self._sync_flags = DmaBufSyncFlags.RW
         else:
             raise RuntimeError(f'Bad access type "{access}"')
 
-        dbs = DmabufFramebuffer.struct_dma_buf_sync()
-        dbs.flags = DmabufFramebuffer.DMA_BUF_SYNC_START | self._sync_flags
-
         for p in self.planes:
-            fcntl.ioctl(p.prime_fd, DmabufFramebuffer.DMA_BUF_IOCTL_SYNC, dbs, False)
+            dmabuf_sync(p.prime_fd, DmaBufSyncFlags.START | self._sync_flags)
 
     def end_cpu_access(self):
         if self._sync_flags == 0:
             raise RuntimeError('begin_cpu sync not started')
 
-        dbs = DmabufFramebuffer.struct_dma_buf_sync()
-        dbs.flags = DmabufFramebuffer.DMA_BUF_SYNC_END | self._sync_flags
-
         for p in self.planes:
-            fcntl.ioctl(p.prime_fd, DmabufFramebuffer.DMA_BUF_IOCTL_SYNC, dbs, False)
+            dmabuf_sync(p.prime_fd, DmaBufSyncFlags.END | self._sync_flags)
 
-        self._sync_flags = 0
+        self._sync_flags = DmaBufSyncFlags(0)
 
 
 class ExtFramebuffer(Framebuffer):
