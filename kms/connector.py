@@ -44,9 +44,19 @@ class Connector(DrmPropObject):
     def __init__(self, card: Card, id, idx) -> None:
         super().__init__(card, id, kms.uapi.DRM_MODE_OBJECT_CONNECTOR, idx)
 
-        res = kms.uapi.drm_mode_get_connector(connector_id=id)
+        self._read_connector()
 
-        fcntl.ioctl(card.fd, kms.uapi.DRM_IOCTL_MODE_GETCONNECTOR, res, True)
+        res = self.connector_res
+
+        type_name = Connector.connector_names.get(
+            res.connector_type, f'Unknown{res.connector_type}'
+        )
+        self.fullname = f'{type_name}-{res.connector_type_id}'
+
+    def _read_connector(self):
+        res = kms.uapi.drm_mode_get_connector(connector_id=self.id)
+
+        fcntl.ioctl(self.card.fd, kms.uapi.DRM_IOCTL_MODE_GETCONNECTOR, res, True)
 
         encoder_ids = (kms.uapi.c_uint32 * res.count_encoders)()
         res.encoders_ptr = ctypes.addressof(encoder_ids)
@@ -54,24 +64,20 @@ class Connector(DrmPropObject):
         modes = (kms.uapi.drm_mode_modeinfo * res.count_modes)()
         res.modes_ptr = ctypes.addressof(modes)
 
-        prop_ids = (kms.uapi.c_uint32 * res.count_props)()
-        res.props_ptr = ctypes.addressof(prop_ids)
+        # The properties are fetched by DrmPropObject.refresh_props()
+        res.count_props = 0
 
-        prop_values = (kms.uapi.c_uint64 * res.count_props)()
-        res.prop_values_ptr = ctypes.addressof(prop_values)
-
-        fcntl.ioctl(card.fd, kms.uapi.DRM_IOCTL_MODE_GETCONNECTOR, res, True)
+        fcntl.ioctl(self.card.fd, kms.uapi.DRM_IOCTL_MODE_GETCONNECTOR, res, True)
 
         self.connector_res = res
         self.encoder_ids = encoder_ids
         self.modes = [kms.VideoMode._from_modeinfo(m) for m in modes]
 
-        type_name = Connector.connector_names.get(
-            res.connector_type, f'Unknown{res.connector_type}'
-        )
-        self.fullname = f'{type_name}-{res.connector_type_id}'
-
-        # print(f"connector {id}: type: {res.connector_type}, num_modes: {len(self.modes)}")
+    def refresh(self):
+        """Re-read the connector state (connection status, modes, encoders)
+        and the properties from the kernel."""
+        self._read_connector()
+        self.refresh_props()
 
     @property
     def connected(self):
@@ -81,19 +87,8 @@ class Connector(DrmPropObject):
         )
 
     def refresh_modes(self):
-        res = kms.uapi.drm_mode_get_connector(connector_id=self.id)
-
-        fcntl.ioctl(self.card.fd, kms.uapi.DRM_IOCTL_MODE_GETCONNECTOR, res, True)
-
-        modes = (kms.uapi.drm_mode_modeinfo * res.count_modes)()
-        res.modes_ptr = ctypes.addressof(modes)
-
-        res.count_props = 0
-        res.count_encoders = 0
-
-        fcntl.ioctl(self.card.fd, kms.uapi.DRM_IOCTL_MODE_GETCONNECTOR, res, True)
-
-        self.modes = [kms.VideoMode._from_modeinfo(m) for m in modes]
+        """Deprecated, use refresh()."""
+        self.refresh()
 
     def get_default_mode(self):
         return self.modes[0]
