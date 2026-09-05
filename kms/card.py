@@ -6,6 +6,7 @@ import glob
 import io
 import os
 import weakref
+from dataclasses import dataclass
 
 import kms.uapi
 from kms.connector import Connector
@@ -20,7 +21,18 @@ from kms.plane import Plane
 
 __all__ = [
     'Card',
+    'Version',
 ]
+
+
+@dataclass
+class Version:
+    major: int
+    minor: int
+    patchlevel: int
+    name: str
+    date: str
+    desc: str
 
 
 class Card:
@@ -126,17 +138,28 @@ class Card:
     def drop_master(self):
         fcntl.ioctl(self.fd, kms.uapi.DRM_IOCTL_DROP_MASTER, 0, False)
 
-    def get_version(self):
+    def get_version(self) -> Version:
         ver = kms.uapi.drm_version()
         fcntl.ioctl(self.fd, kms.uapi.DRM_IOCTL_VERSION, ver, True)
 
-        ver.name = kms.uapi.String(b' ' * ver.name_len)
-        ver.date = kms.uapi.String(b' ' * ver.date_len)
-        ver.desc = kms.uapi.String(b' ' * ver.desc_len)
+        name = ctypes.create_string_buffer(ver.name_len)
+        date = ctypes.create_string_buffer(ver.date_len)
+        desc = ctypes.create_string_buffer(ver.desc_len)
+
+        ver.name.raw = ctypes.cast(name, ctypes.POINTER(ctypes.c_char))
+        ver.date.raw = ctypes.cast(date, ctypes.POINTER(ctypes.c_char))
+        ver.desc.raw = ctypes.cast(desc, ctypes.POINTER(ctypes.c_char))
 
         fcntl.ioctl(self.fd, kms.uapi.DRM_IOCTL_VERSION, ver, True)
 
-        return ver
+        return Version(
+            ver.version_major,
+            ver.version_minor,
+            ver.version_patchlevel,
+            name.value.decode(),
+            date.value.decode(),
+            desc.value.decode(),
+        )
 
     def get_res(self):
         res = kms.uapi.drm_mode_card_res()
