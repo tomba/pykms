@@ -81,16 +81,6 @@ class AtomicReq:
         atomic.prop_values_ptr = ctypes.addressof(prop_values)
         atomic.flags = flags
 
-        pidx = 0
-        for oidx, oid in enumerate(objs):
-            prop_count = count_props[oidx]
-
-            for _ in range(prop_count):
-                prop_id = prop_ids[pidx]
-                prop_value = prop_values[pidx]
-
-                pidx += 1
-
         fcntl.ioctl(self.card.fd, kms.uapi.DRM_IOCTL_MODE_ATOMIC, atomic, True)
 
     def add_single(self, ob: kms.DrmPropObject | int, prop: str | int, value: int):
