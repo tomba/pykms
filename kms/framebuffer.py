@@ -136,6 +136,26 @@ class Framebuffer(DrmObject, IFramebuffer):
         raise NotImplementedError()
 
 
+def _add_fb2(
+    card: Card,
+    width: int,
+    height: int,
+    format: kms.PixelFormat,
+    planes: list[Framebuffer.FramebufferPlane],
+) -> int:
+    fb2 = kms.uapi.struct_drm_mode_fb_cmd2()
+    fb2.width = width
+    fb2.height = height
+    fb2.pixel_format = format.drm_fourcc
+    fb2.handles = (ctypes.c_uint * 4)(*[p.handle for p in planes])
+    fb2.pitches = (ctypes.c_uint * 4)(*[p.pitch for p in planes])
+    fb2.offsets = (ctypes.c_uint * 4)(*[p.offset for p in planes])
+
+    fcntl.ioctl(card.fd, kms.uapi.DRM_IOCTL_MODE_ADDFB2, fb2, True)
+
+    return fb2.fb_id
+
+
 class DumbFramebuffer(Framebuffer):
     def __init__(self, card: Card, width: int, height: int, format: kms.PixelFormat) -> None:
         planes = []
@@ -154,17 +174,9 @@ class DumbFramebuffer(Framebuffer):
 
             planes.append(plane)
 
-        fb2 = kms.uapi.struct_drm_mode_fb_cmd2()
-        fb2.width = width
-        fb2.height = height
-        fb2.pixel_format = format.drm_fourcc
-        fb2.handles = (ctypes.c_uint * 4)(*[p.handle for p in planes])
-        fb2.pitches = (ctypes.c_uint * 4)(*[p.pitch for p in planes])
-        fb2.offsets = (ctypes.c_uint * 4)(*[p.offset for p in planes])
+        fb_id = _add_fb2(card, width, height, format, planes)
 
-        fcntl.ioctl(card.fd, kms.uapi.DRM_IOCTL_MODE_ADDFB2, fb2, True)
-
-        super().__init__(card, fb2.fb_id, width, height, format, planes)
+        super().__init__(card, fb_id, width, height, format, planes)
 
         weakref.finalize(self, DumbFramebuffer.cleanup, self.card, self.id, planes)
 
@@ -283,17 +295,9 @@ class DmabufFramebuffer(Framebuffer):
             plane.offset = offsets[idx]
             planes.append(plane)
 
-        fb2 = kms.uapi.struct_drm_mode_fb_cmd2()
-        fb2.width = width
-        fb2.height = height
-        fb2.pixel_format = format.drm_fourcc
-        fb2.handles = (ctypes.c_uint * 4)(*[p.handle for p in planes])
-        fb2.pitches = (ctypes.c_uint * 4)(*[p.pitch for p in planes])
-        fb2.offsets = (ctypes.c_uint * 4)(*[p.offset for p in planes])
+        fb_id = _add_fb2(card, width, height, format, planes)
 
-        fcntl.ioctl(card.fd, kms.uapi.DRM_IOCTL_MODE_ADDFB2, fb2, True)
-
-        super().__init__(card, fb2.fb_id, width, height, format, planes)
+        super().__init__(card, fb_id, width, height, format, planes)
 
         weakref.finalize(self, DmabufFramebuffer.cleanup, self.card, self.id, self.planes)
 
@@ -385,17 +389,9 @@ class ExtFramebuffer(Framebuffer):
             plane.offset = offsets[idx]
             planes.append(plane)
 
-        fb2 = kms.uapi.struct_drm_mode_fb_cmd2()
-        fb2.width = width
-        fb2.height = height
-        fb2.pixel_format = format.drm_fourcc
-        fb2.handles = (ctypes.c_uint * 4)(*[p.handle for p in planes])
-        fb2.pitches = (ctypes.c_uint * 4)(*[p.pitch for p in planes])
-        fb2.offsets = (ctypes.c_uint * 4)(*[p.offset for p in planes])
+        fb_id = _add_fb2(card, width, height, format, planes)
 
-        fcntl.ioctl(card.fd, kms.uapi.DRM_IOCTL_MODE_ADDFB2, fb2, True)
-
-        super().__init__(card, fb2.fb_id, width, height, format, planes)
+        super().__init__(card, fb_id, width, height, format, planes)
 
         weakref.finalize(self, ExtFramebuffer.cleanup, self.card, self.id, self.planes)
 
