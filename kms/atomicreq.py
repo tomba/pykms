@@ -86,8 +86,10 @@ class AtomicReq:
     def add_single(self, ob: kms.DrmPropObject | int, prop: str | int, value: int):
         if isinstance(ob, int):
             ob_id = ob
-            ob = self.card.get_object(ob_id)
-            assert isinstance(ob, kms.DrmPropObject)
+            obj = self.card.get_object(ob_id)
+            if not isinstance(obj, kms.DrmPropObject):
+                raise TypeError(f'{obj} has no properties')
+            ob = obj
         elif isinstance(ob, kms.DrmPropObject):
             ob_id = ob.id
         else:

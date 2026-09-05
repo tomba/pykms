@@ -11,6 +11,7 @@ import kms.uapi
 from kms.connector import Connector
 from kms.crtc import Crtc
 from kms.drmevent import DrmEvent, DrmEventType
+from kms.drmobject import DrmObject
 from kms.drmproperty import DrmProperty
 from kms.drmpropobject import DrmPropObject
 from kms.encoder import Encoder
@@ -82,14 +83,18 @@ class Card:
 
         self._props: dict[int, DrmProperty] = props
 
-    def find_property(self, prop_id: int):
+    def find_property(self, prop_id: int) -> DrmProperty:
         return self._props[prop_id]
 
-    def find_property_id(self, obj: DrmPropObject, prop_name: str):
+    def find_property_id(self, obj: DrmPropObject, prop_name: str) -> int:
         # We may have duplicate names
-        return next(id for id in obj.prop_values if self._props[id].name == prop_name)
+        for prop_id in obj.prop_values:
+            if self._props[prop_id].name == prop_name:
+                return prop_id
 
-    def find_property_name(self, prop_id):
+        raise KeyError(f'{obj} has no property "{prop_name}"')
+
+    def find_property_name(self, prop_id: int) -> str:
         return self._props[prop_id].name
 
     def set_defaults(self):
@@ -166,21 +171,33 @@ class Card:
 
         self.planes = [Plane(self, id, idx) for idx, id in enumerate(plane_ids)]
 
-    def get_object(self, id):
-        return next(
-            ob
-            for ob in [*self.crtcs, *self.connectors, *self.encoders, *self.planes]
-            if ob.id == id
-        )
+    def get_object(self, id: int) -> DrmObject:
+        for ob in [*self.crtcs, *self.connectors, *self.encoders, *self.planes]:
+            if ob.id == id:
+                return ob
 
-    def get_connector(self, id):
-        return next(ob for ob in self.connectors if ob.id == id)
+        raise KeyError(f'No object with id {id}')
 
-    def get_crtc(self, id):
-        return next(ob for ob in self.crtcs if ob.id == id)
+    def get_connector(self, id: int) -> Connector:
+        for ob in self.connectors:
+            if ob.id == id:
+                return ob
 
-    def get_encoder(self, id):
-        return next(ob for ob in self.encoders if ob.id == id)
+        raise KeyError(f'No connector with id {id}')
+
+    def get_crtc(self, id: int) -> Crtc:
+        for ob in self.crtcs:
+            if ob.id == id:
+                return ob
+
+        raise KeyError(f'No CRTC with id {id}')
+
+    def get_encoder(self, id: int) -> Encoder:
+        for ob in self.encoders:
+            if ob.id == id:
+                return ob
+
+        raise KeyError(f'No encoder with id {id}')
 
     def get_framebuffer(self, id):
         res = kms.uapi.drm_mode_fb_cmd2()
