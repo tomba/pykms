@@ -44,14 +44,14 @@ class Crtc(DrmPropObject):
             (
                 p
                 for p in self.get_possible_planes()
-                if p.type == kms.PlaneType.PRIMARY and p.crtc_id == self.id
+                if p.plane_type == kms.PlaneType.PRIMARY and p.crtc_id == self.id
             ),
             None,
         )
         if plane:
             return plane
         plane = next(
-            (p for p in self.get_possible_planes() if p.type == kms.PlaneType.PRIMARY), None
+            (p for p in self.get_possible_planes() if p.plane_type == kms.PlaneType.PRIMARY), None
         )
         if plane:
             return plane
