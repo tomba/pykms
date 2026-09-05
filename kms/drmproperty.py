@@ -33,8 +33,8 @@ class DrmProperty(DrmObject):
 
         self.name = prop.name.decode('ascii')
 
-        self.immutable = prop.flags & kms.uapi.DRM_MODE_PROP_IMMUTABLE
-        self.atomic = prop.flags & kms.uapi.DRM_MODE_PROP_ATOMIC
+        self.immutable = bool(prop.flags & kms.uapi.DRM_MODE_PROP_IMMUTABLE)
+        self.atomic = bool(prop.flags & kms.uapi.DRM_MODE_PROP_ATOMIC)
 
         ext_type = prop.flags & kms.uapi.DRM_MODE_PROP_EXTENDED_TYPE
 

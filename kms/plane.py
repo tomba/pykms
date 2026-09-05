@@ -49,7 +49,7 @@ class Plane(DrmPropObject):
         return f'Plane({self.id})'
 
     def supports_crtc(self, crtc: Crtc):
-        return self.res.possible_crtcs & (1 << crtc.idx)
+        return bool(self.res.possible_crtcs & (1 << crtc.idx))
 
     @property
     def plane_type(self):
