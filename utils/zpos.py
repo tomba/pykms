@@ -37,15 +37,17 @@ w = 500
 h = 500
 
 fbs = []
+nfbs = []
 
 for i in range(len(planes)):
     fb = kms.DumbFramebuffer(card, w, h, kms.PixelFormats.ARGB8888)
-    fbs.append(drawing.NumpyFramebuffer(fb))
+    fbs.append(fb)
+    nfbs.append(drawing.NumpyFramebuffer(fb))
 
-fbs[0].fill_rect(50, 50, 200, 200, drawing.RGB(128, 255, 0, 0))
-fbs[1].fill_rect(150, 50, 200, 200, drawing.RGB(128, 0, 255, 0))
-fbs[2].fill_rect(50, 150, 200, 200, drawing.RGB(128, 0, 0, 255))
-fbs[3].fill_rect(150, 150, 200, 200, drawing.RGB(128, 128, 128, 128))
+nfbs[0].fill_rect(50, 50, 200, 200, drawing.RGB(128, 255, 0, 0))
+nfbs[1].fill_rect(150, 50, 200, 200, drawing.RGB(128, 0, 255, 0))
+nfbs[2].fill_rect(50, 150, 200, 200, drawing.RGB(128, 0, 0, 255))
+nfbs[3].fill_rect(150, 150, 200, 200, drawing.RGB(128, 128, 128, 128))
 
 req = kms.AtomicReq(card)
 
