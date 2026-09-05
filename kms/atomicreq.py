@@ -15,13 +15,15 @@ class AtomicReq:
         self.props = []  # (ob_id, prop_id, value)
         self.debug_print = False
 
-    def commit(self, allow_modeset=False):
+    def commit(self, allow_modeset=False, user_data: int = 0):
+        """Commit asynchronously. A FLIP_COMPLETE event carrying user_data is
+        delivered through Card.read_events() when the commit has completed."""
         flags = kms.uapi.DRM_MODE_PAGE_FLIP_EVENT | kms.uapi.DRM_MODE_ATOMIC_NONBLOCK
 
         if allow_modeset:
             flags |= kms.uapi.DRM_MODE_ATOMIC_ALLOW_MODESET
 
-        self._commit(flags)
+        self._commit(flags, user_data)
 
     def commit_sync(self, allow_modeset=False):
         flags = 0
@@ -31,7 +33,7 @@ class AtomicReq:
 
         self._commit(flags)
 
-    def _commit(self, flags):
+    def _commit(self, flags: int, user_data: int = 0):
         # Sort the list by object ID, then by property ID
         props = sorted(self.props, key=lambda tuple: (tuple[0], tuple[1]))
 
@@ -80,6 +82,7 @@ class AtomicReq:
         atomic.props_ptr = ctypes.addressof(prop_ids)
         atomic.prop_values_ptr = ctypes.addressof(prop_values)
         atomic.flags = flags
+        atomic.user_data = user_data
 
         fcntl.ioctl(self.card.fd, kms.uapi.DRM_IOCTL_MODE_ATOMIC, atomic, True)
 
