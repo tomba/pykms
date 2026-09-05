@@ -104,15 +104,19 @@ class Card:
         if not cap.value:
             raise NotImplementedError('Card does not support dumb buffers')
 
-        client_cap = kms.uapi.drm_set_client_cap(kms.uapi.DRM_CLIENT_CAP_UNIVERSAL_PLANES, 1)
-        fcntl.ioctl(self.fd, kms.uapi.DRM_IOCTL_SET_CLIENT_CAP, client_cap, True)
-        if not cap.value:
-            raise NotImplementedError('Card does not support universal planes')
+        try:
+            self.set_client_cap(kms.uapi.DRM_CLIENT_CAP_UNIVERSAL_PLANES, 1)
+        except OSError as e:
+            raise NotImplementedError('Card does not support universal planes') from e
 
-        client_cap = kms.uapi.drm_set_client_cap(kms.uapi.DRM_CLIENT_CAP_ATOMIC, 1)
+        try:
+            self.set_client_cap(kms.uapi.DRM_CLIENT_CAP_ATOMIC, 1)
+        except OSError as e:
+            raise NotImplementedError('Card does not support atomic modesetting') from e
+
+    def set_client_cap(self, capability: int, value: int):
+        client_cap = kms.uapi.drm_set_client_cap(capability, value)
         fcntl.ioctl(self.fd, kms.uapi.DRM_IOCTL_SET_CLIENT_CAP, client_cap, True)
-        if not cap.value:
-            raise NotImplementedError('Card does not support atomic modesetting')
 
     def drop_master(self):
         fcntl.ioctl(self.fd, kms.uapi.DRM_IOCTL_DROP_MASTER, 0, False)
