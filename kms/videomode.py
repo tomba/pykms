@@ -132,8 +132,25 @@ class VideoMode:
         return self.vdisplay + self.vfp + self.vsw + self.vbp
 
     @property
-    def calculated_vrefresh(self):
-        return self.clock / (self.htotal * self.vtotal)
+    def calculated_vrefresh(self) -> float:
+        """Refresh rate in Hz calculated from the timings, as the kernel's
+        drm_mode_vrefresh() does. Returns 0 for a mode without timings."""
+        den = self.htotal * self.vtotal
+        if den == 0:
+            return 0.0
+
+        num = self.clock
+
+        if self.flags & ModeFlag.INTERLACE:
+            num *= 2
+
+        if self.flags & ModeFlag.DBLSCAN:
+            den *= 2
+
+        if self.vscan > 1:
+            den *= self.vscan
+
+        return num / den
 
     # Flag-based properties
 
