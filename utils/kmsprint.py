@@ -42,12 +42,9 @@ class Printer:
     def print_crtc(self, crtc: kms.Crtc, indent: int):
         m = crtc.mode
 
-        refresh = (m.clock * 1000.0) / (m.htotal * m.vtotal) * (2 if m.interlace else 1)
-        refresh = round(refresh, 2)
-
         printi(
             indent,
-            f'Crtc {crtc.idx} ({crtc.id}) {m.hdisplay}x{m.vdisplay}@{refresh} {m.clock / 1000:.3f}',
+            f'Crtc {crtc.idx} ({crtc.id}) {m.hdisplay}x{m.vdisplay}@{m.calculated_vrefresh:.2f} {m.clock / 1000000:.3f} MHz',
         )
 
         self.print_props(crtc, indent + 4)
