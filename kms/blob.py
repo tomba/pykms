@@ -17,6 +17,12 @@ __all__ = ['Blob']
 
 class Blob(DrmObject):
     def __init__(self, card: Card, data) -> None:
+        """Create a property blob from a ctypes object or a bytes-like object.
+        The kernel copies the data, so it need not stay alive after this."""
+        if isinstance(data, (bytes, bytearray, memoryview)):
+            mv = memoryview(data).cast('B')
+            data = (ctypes.c_ubyte * mv.nbytes).from_buffer_copy(mv)
+
         blob = kms.uapi.drm_mode_create_blob()
         blob.data = ctypes.addressof(data)
         blob.length = ctypes.sizeof(data)
