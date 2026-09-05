@@ -337,7 +337,7 @@ class DmabufFramebuffer(Framebuffer):
         elif access == 'rw':
             self._sync_flags = DmabufFramebuffer.DMA_BUF_SYNC_RW
         else:
-            raise RuntimeError('Bad access type "{access}"')
+            raise RuntimeError(f'Bad access type "{access}"')
 
         dbs = DmabufFramebuffer.struct_dma_buf_sync()
         dbs.flags = DmabufFramebuffer.DMA_BUF_SYNC_START | self._sync_flags
