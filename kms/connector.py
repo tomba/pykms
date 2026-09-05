@@ -36,6 +36,9 @@ class Connector(DrmPropObject):
         kms.uapi.DRM_MODE_CONNECTOR_VIRTUAL: 'Virtual',
         kms.uapi.DRM_MODE_CONNECTOR_DSI: 'DSI',
         kms.uapi.DRM_MODE_CONNECTOR_DPI: 'DPI',
+        kms.uapi.DRM_MODE_CONNECTOR_WRITEBACK: 'Writeback',
+        kms.uapi.DRM_MODE_CONNECTOR_SPI: 'SPI',
+        kms.uapi.DRM_MODE_CONNECTOR_USB: 'USB',
     }
 
     def __init__(self, card: Card, id, idx) -> None:
@@ -63,7 +66,10 @@ class Connector(DrmPropObject):
         self.encoder_ids = encoder_ids
         self.modes = [kms.VideoMode._from_modeinfo(m) for m in modes]
 
-        self.fullname = f'{Connector.connector_names[res.connector_type]}-{res.connector_type_id}'
+        type_name = Connector.connector_names.get(
+            res.connector_type, f'Unknown{res.connector_type}'
+        )
+        self.fullname = f'{type_name}-{res.connector_type_id}'
 
         # print(f"connector {id}: type: {res.connector_type}, num_modes: {len(self.modes)}")
 
