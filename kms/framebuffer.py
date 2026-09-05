@@ -160,25 +160,36 @@ class DumbFramebuffer(Framebuffer):
     def __init__(self, card: Card, width: int, height: int, format: kms.PixelFormat) -> None:
         planes = []
 
-        for idx, _ in enumerate(format.planes):
-            creq = kms.uapi.drm_mode_create_dumb()
+        try:
+            for idx, _ in enumerate(format.planes):
+                creq = kms.uapi.drm_mode_create_dumb()
 
-            creq.width, creq.height, creq.bpp = format.dumb_size(width, height, idx)
+                creq.width, creq.height, creq.bpp = format.dumb_size(width, height, idx)
 
-            fcntl.ioctl(card.fd, kms.uapi.DRM_IOCTL_MODE_CREATE_DUMB, creq, True)
+                fcntl.ioctl(card.fd, kms.uapi.DRM_IOCTL_MODE_CREATE_DUMB, creq, True)
 
-            plane = Framebuffer.FramebufferPlane()
-            plane.handle = creq.handle
-            plane.pitch = creq.pitch
-            plane.size = creq.height * creq.pitch
+                plane = Framebuffer.FramebufferPlane()
+                plane.handle = creq.handle
+                plane.pitch = creq.pitch
+                plane.size = creq.height * creq.pitch
 
-            planes.append(plane)
+                planes.append(plane)
 
-        fb_id = _add_fb2(card, width, height, format, planes)
+            fb_id = _add_fb2(card, width, height, format, planes)
+        except Exception:
+            for p in planes:
+                DumbFramebuffer._destroy_dumb(card, p.handle)
+            raise
 
         super().__init__(card, fb_id, width, height, format, planes)
 
         weakref.finalize(self, DumbFramebuffer.cleanup, self.card, self.id, planes)
+
+    @staticmethod
+    def _destroy_dumb(card: Card, handle: int):
+        dumb = kms.uapi.drm_mode_destroy_dumb()
+        dumb.handle = handle
+        fcntl.ioctl(card.fd, kms.uapi.DRM_IOCTL_MODE_DESTROY_DUMB, dumb, True)
 
     @staticmethod
     def cleanup(card: Card, fb_id: int, planes: list[Framebuffer.FramebufferPlane]):
@@ -200,9 +211,7 @@ class DumbFramebuffer(Framebuffer):
         fcntl.ioctl(card.fd, kms.uapi.DRM_IOCTL_MODE_RMFB, ctypes.c_uint32(fb_id), False)
 
         for p in planes:
-            dumb = kms.uapi.drm_mode_destroy_dumb()
-            dumb.handle = p.handle
-            fcntl.ioctl(card.fd, kms.uapi.DRM_IOCTL_MODE_DESTROY_DUMB, dumb, True)
+            DumbFramebuffer._destroy_dumb(card, p.handle)
 
     def __repr__(self) -> str:
         return f'DumbFramebuffer({self.id})'
@@ -281,21 +290,29 @@ class DmabufFramebuffer(Framebuffer):
 
         self._sync_flags = 0
 
-        fds = [os.dup(fd) for fd in fds]
+        dup_fds = []
 
-        for idx in range(len(format.planes)):
-            args = kms.uapi.drm_prime_handle(fd=fds[idx])
-            fcntl.ioctl(card.fd, kms.uapi.DRM_IOCTL_PRIME_FD_TO_HANDLE, args, True)
+        try:
+            for fd in fds:
+                dup_fds.append(os.dup(fd))
 
-            plane = Framebuffer.FramebufferPlane()
-            plane.handle = args.handle
-            plane.pitch = pitches[idx]
-            plane.size = format.planesize(plane.pitch, height, idx)
-            plane.prime_fd = fds[idx]
-            plane.offset = offsets[idx]
-            planes.append(plane)
+            for idx in range(len(format.planes)):
+                args = kms.uapi.drm_prime_handle(fd=dup_fds[idx])
+                fcntl.ioctl(card.fd, kms.uapi.DRM_IOCTL_PRIME_FD_TO_HANDLE, args, True)
 
-        fb_id = _add_fb2(card, width, height, format, planes)
+                plane = Framebuffer.FramebufferPlane()
+                plane.handle = args.handle
+                plane.pitch = pitches[idx]
+                plane.size = format.planesize(plane.pitch, height, idx)
+                plane.prime_fd = dup_fds[idx]
+                plane.offset = offsets[idx]
+                planes.append(plane)
+
+            fb_id = _add_fb2(card, width, height, format, planes)
+        except Exception:
+            for fd in dup_fds:
+                os.close(fd)
+            raise
 
         super().__init__(card, fb_id, width, height, format, planes)
 
