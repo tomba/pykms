@@ -199,6 +199,13 @@ class Card:
 
         raise KeyError(f'No encoder with id {id}')
 
+    def get_plane(self, id: int) -> Plane:
+        for ob in self.planes:
+            if ob.id == id:
+                return ob
+
+        raise KeyError(f'No plane with id {id}')
+
     def get_framebuffer(self, id):
         res = kms.uapi.drm_mode_fb_cmd2()
         res.fb_id = id
