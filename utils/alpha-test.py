@@ -28,26 +28,34 @@ else:
 planes = []
 
 for i in range(max_planes):
-    p = res.reserve_plane(crtc)
-    if p is None:
+    try:
+        p = res.reserve_plane(crtc)
+    except RuntimeError:
         break
     planes.append(p)
 
-print('Got {} planes. Test supports up to 4 planes.'.format(len(planes)))
+print(f'Got {len(planes)} planes. Test supports up to {max_planes} planes.')
 
 w = mode.hdisplay
 h = mode.vdisplay
 
 fbs = []
+nfbs = []
 
-for i in range(max_planes):
+for i in range(len(planes)):
     fb = kms.DumbFramebuffer(card, w, h, kms.PixelFormats.ARGB8888)
-    fbs.append(drawing.NumpyFramebuffer(fb))
+    fbs.append(fb)
+    nfbs.append(drawing.NumpyFramebuffer(fb))
 
-fbs[0].fill_rect(50, 50, 200, 200, drawing.RGB(128, 255, 0, 0))
-fbs[1].fill_rect(150, 50, 200, 200, drawing.RGB(128, 0, 255, 0))
-fbs[2].fill_rect(50, 150, 200, 200, drawing.RGB(128, 0, 0, 255))
-fbs[3].fill_rect(150, 150, 200, 200, drawing.RGB(128, 128, 128, 128))
+rects = [
+    (50, 50, drawing.RGB(128, 255, 0, 0)),
+    (150, 50, drawing.RGB(128, 0, 255, 0)),
+    (50, 150, drawing.RGB(128, 0, 0, 255)),
+    (150, 150, drawing.RGB(128, 128, 128, 128)),
+]
+
+for nfb, (x, y, color) in zip(nfbs, rects):
+    nfb.fill_rect(x, y, 200, 200, color)
 
 if args.resetcrtc:
     crtc.set_props(
