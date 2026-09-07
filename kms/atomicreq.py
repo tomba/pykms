@@ -10,6 +10,15 @@ __all__ = ['AtomicReq']
 
 
 class AtomicReq:
+    """An atomic modesetting request.
+
+    The request only collects object, property and value IDs. It does not
+    keep the objects the values refer to alive: the caller must hold
+    references to the framebuffers and blobs (e.g. a mode blob from
+    :meth:`VideoMode.to_blob`) it passes in until the commit has returned,
+    as they destroy the kernel object when garbage collected.
+    """
+
     def __init__(self, card: kms.Card) -> None:
         self.card = card
         self.props = []  # (ob_id, prop_id, value)
@@ -123,6 +132,11 @@ class AtomicReq:
         self.add(connector.id, 'CRTC_ID', crtc.id if crtc else 0)
 
     def add_crtc(self, crtc: kms.Crtc, mode_blob: kms.Blob | None):
+        """Enable the CRTC with the given mode blob, or disable it with None.
+
+        Only the blob ID is stored, so the caller must keep ``mode_blob``
+        alive until the commit has returned; see :class:`Blob`.
+        """
         if mode_blob:
             self.add(crtc.id, {'ACTIVE': 1, 'MODE_ID': mode_blob.id})
         else:

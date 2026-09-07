@@ -16,9 +16,22 @@ __all__ = ['Blob']
 
 
 class Blob(DrmObject):
+    """A kernel property blob, e.g. a mode for the CRTC MODE_ID property.
+
+    The Blob object owns the kernel blob: the blob is destroyed when the
+    object is garbage collected. Requests only store the blob ID, so keep a
+    reference to the Blob until every commit that uses it has returned.
+    Passing a temporary such as ``mode.to_blob(card)`` directly to
+    :meth:`AtomicReq.add_crtc` destroys the blob before the commit, which
+    then fails with EINVAL. After a successful commit the kernel holds its
+    own reference for as long as the blob is in use, so the object may be
+    dropped then.
+    """
+
     def __init__(self, card: Card, data) -> None:
         """Create a property blob from a ctypes object or a bytes-like object.
-        The kernel copies the data, so it need not stay alive after this."""
+        The kernel copies the data, so the data object need not stay alive
+        after this. The Blob object itself must; see the class docstring."""
         if isinstance(data, (bytes, bytearray, memoryview)):
             mv = memoryview(data).cast('B')
             data = (ctypes.c_ubyte * mv.nbytes).from_buffer_copy(mv)

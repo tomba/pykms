@@ -98,6 +98,19 @@ class VideoMode:
         return f'{self.hdisplay}x{self.vdisplay}@{self.vrefresh}'
 
     def to_blob(self, card: Card):
+        """Create a property blob of this mode for the CRTC MODE_ID property.
+
+        The returned :class:`Blob` owns the kernel blob and destroys it when
+        garbage collected, so keep a reference to it until the commit that
+        uses it has returned::
+
+            modeb = mode.to_blob(card)
+            req.add_crtc(crtc, modeb)
+            req.commit_sync(allow_modeset=True)
+
+        Do not pass ``mode.to_blob(card)`` directly to ``add_crtc()``: the
+        blob is destroyed before the commit, which then fails with EINVAL.
+        """
         return kms.Blob(card, self._to_modeinfo())
 
     def copy(self) -> VideoMode:
